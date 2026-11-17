@@ -1,5 +1,10 @@
 import { useState, type FormEvent } from 'react'
-import type { NewShoppingItem } from '../../../../../shared/shopping-list'
+import {
+  ITEM_UNITS,
+  type ItemUnit,
+  type NewShoppingItem,
+} from '../../../../../shared/shopping-list'
+import { createItemDraft, parseItemDraft } from '../../utils/itemDraft'
 import styles from './ShoppingItemForm.module.css'
 
 interface ShoppingItemFormProps {
@@ -11,9 +16,7 @@ export function ShoppingItemForm({
   onSubmit,
   isSubmitting,
 }: ShoppingItemFormProps) {
-  const [name, setName] = useState('')
-  const [quantity, setQuantity] = useState('1')
-  const [unitPrice, setUnitPrice] = useState('')
+  const [draft, setDraft] = useState(() => createItemDraft())
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null,
   )
@@ -21,44 +24,25 @@ export function ShoppingItemForm({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const trimmedName = name.trim()
+    const parsed = parseItemDraft(draft)
 
-    if (trimmedName.length < 2) {
-      setValidationMessage('Informe o nome do produto.')
-      return
-    }
-
-    const parsedQuantity = Number(quantity.replace(',', '.'))
-    const parsedPrice = unitPrice === '' ? null : Number(unitPrice.replace(',', '.'))
-
-    if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
-      setValidationMessage('A quantidade deve ser maior que zero.')
-      return
-    }
-
-    if (parsedPrice !== null && (!Number.isFinite(parsedPrice) || parsedPrice < 0)) {
-      setValidationMessage('O preço não pode ser negativo.')
+    if (!parsed.ok) {
+      setValidationMessage(parsed.message)
       return
     }
 
     setValidationMessage(null)
 
-    const created = await onSubmit({
-      name: trimmedName,
-      quantity: parsedQuantity,
-      unitPrice: parsedPrice,
-    })
+    const created = await onSubmit(parsed.value)
 
     if (!created) return
 
-    setName('')
-    setQuantity('1')
-    setUnitPrice('')
+    setDraft(createItemDraft())
   }
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.nameField}>
+      <div>
         <label className="form-label" htmlFor="item-name">
           Produto
         </label>
@@ -66,8 +50,10 @@ export function ShoppingItemForm({
           id="item-name"
           className="form-control"
           placeholder="Ex.: Leite integral"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
+          value={draft.name}
+          onChange={(event) =>
+            setDraft((current) => ({ ...current, name: event.target.value }))
+          }
           maxLength={80}
         />
       </div>
@@ -81,9 +67,37 @@ export function ShoppingItemForm({
             id="item-quantity"
             className="form-control"
             inputMode="decimal"
-            value={quantity}
-            onChange={(event) => setQuantity(event.target.value)}
+            value={draft.quantity}
+            onChange={(event) =>
+              setDraft((current) => ({
+                ...current,
+                quantity: event.target.value,
+              }))
+            }
           />
+        </div>
+
+        <div>
+          <label className="form-label" htmlFor="item-unit">
+            Un.
+          </label>
+          <select
+            id="item-unit"
+            className="form-select"
+            value={draft.unit}
+            onChange={(event) =>
+              setDraft((current) => ({
+                ...current,
+                unit: event.target.value as ItemUnit,
+              }))
+            }
+          >
+            {ITEM_UNITS.map((unit) => (
+              <option key={unit} value={unit}>
+                {unit}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -95,8 +109,13 @@ export function ShoppingItemForm({
             className="form-control"
             inputMode="decimal"
             placeholder="Opcional"
-            value={unitPrice}
-            onChange={(event) => setUnitPrice(event.target.value)}
+            value={draft.unitPrice}
+            onChange={(event) =>
+              setDraft((current) => ({
+                ...current,
+                unitPrice: event.target.value,
+              }))
+            }
           />
         </div>
       </div>

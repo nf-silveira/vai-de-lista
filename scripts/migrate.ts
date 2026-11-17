@@ -7,11 +7,17 @@ const SHOPPING_ITEMS_TABLE = `
     id uuid primary key default gen_random_uuid(),
     name text not null,
     quantity numeric(10, 3) not null default 1 check (quantity > 0),
+    unit text not null default 'un',
     unit_price numeric(10, 2) check (unit_price >= 0),
     is_checked boolean not null default false,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
   )
+`
+
+const SHOPPING_ITEMS_UNIT_COLUMN = `
+  alter table shopping_items
+    add column if not exists unit text not null default 'un'
 `
 
 async function run(): Promise<void> {
@@ -20,6 +26,7 @@ async function run(): Promise<void> {
   console.log('Tabelas de autenticação do Better Auth aplicadas.')
 
   await query(SHOPPING_ITEMS_TABLE)
+  await query(SHOPPING_ITEMS_UNIT_COLUMN)
   console.log('Tabela shopping_items aplicada.')
 }
 

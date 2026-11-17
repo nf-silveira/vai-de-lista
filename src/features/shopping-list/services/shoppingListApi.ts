@@ -1,4 +1,8 @@
-import type { NewShoppingItem, ShoppingItem } from '../../../../shared/shopping-list'
+import type {
+  NewShoppingItem,
+  ShoppingItem,
+  ShoppingItemPatch,
+} from '../../../../shared/shopping-list'
 
 interface ItemsResponse {
   items: ShoppingItem[]
@@ -47,10 +51,10 @@ export const shoppingListApi = {
     return created
   },
 
-  async setChecked(id: string, isChecked: boolean): Promise<ShoppingItem> {
+  async update(id: string, patch: ShoppingItemPatch): Promise<ShoppingItem> {
     const { item } = await request<ItemResponse>(`/${id}`, {
       method: 'PATCH',
-      body: JSON.stringify({ isChecked }),
+      body: JSON.stringify(patch),
     })
     return item
   },

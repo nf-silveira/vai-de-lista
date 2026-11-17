@@ -4,14 +4,9 @@
   gap: var(--space-sm);
 }
 
-.nameField {
-  display: flex;
-  flex-direction: column;
-}
-
 .numericFields {
   display: grid;
-  grid-template-columns: 90px 1fr;
+  grid-template-columns: 64px 80px 1fr;
   gap: var(--space-sm);
 }
 

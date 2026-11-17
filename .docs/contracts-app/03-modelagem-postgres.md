@@ -22,6 +22,7 @@ A primeira versão tem **uma única lista compartilhada** entre as duas contas d
 - `id uuid primary key default gen_random_uuid()`
 - `name text not null`
 - `quantity numeric(10,3) not null default 1 check (quantity > 0)`
+- `unit text not null default 'un'` — `un`, `kg`, `g`, `l`, `ml` ou `cx`
 - `unit_price numeric(10,2) null check (unit_price >= 0)` — `null` = preço ainda desconhecido
 - `is_checked boolean not null default false` — marcado como comprado
 - `created_at timestamptz not null default now()`
@@ -32,6 +33,7 @@ create table if not exists shopping_items (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   quantity numeric(10, 3) not null default 1 check (quantity > 0),
+  unit text not null default 'un',
   unit_price numeric(10, 2) check (unit_price >= 0),
   is_checked boolean not null default false,
   created_at timestamptz not null default now(),
