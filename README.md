@@ -46,10 +46,12 @@ src/
 | `DATABASE_URL`                                   | string de conexão do Neon (obrigatória)          |
 | `BETTER_AUTH_SECRET`                             | segredo de assinatura das sessões (obrigatória)  |
 | `BETTER_AUTH_URL`                                | URL do app (ex.: `http://localhost:5174`)        |
-| `ALLOWED_EMAILS`                                 | e-mails autorizados além das contas de seed      |
+| `ALLOWED_EMAILS`                                 | e-mails que acessam a lista (obrigatória em produção) |
 | `ALLOW_PUBLIC_SIGNUP`                            | `true` libera o cadastro para qualquer e-mail    |
 | `SEED_USER_1_EMAIL` / `SEED_USER_1_PASSWORD`     | credenciais da primeira conta permitida          |
 | `SEED_USER_2_EMAIL` / `SEED_USER_2_PASSWORD`     | credenciais da segunda conta permitida           |
+
+A lista é única e compartilhada entre as contas da casa. Só quem está em `ALLOWED_EMAILS` lê e altera itens: em produção, sem essa variável, o acesso é negado. Fora de produção, sem ela, qualquer sessão acessa.
 
 2. Aplique o schema e crie as contas:
 

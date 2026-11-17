@@ -14,6 +14,8 @@ export type ValidationResult<T> =
 
 const NAME_MIN_LENGTH = 2
 const NAME_MAX_LENGTH = 80
+const QUANTITY_MAX = 999_999
+const PRICE_MAX = 999_999.99
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -46,6 +48,13 @@ export function parseItemQuantity(value: unknown): ValidationResult<number> {
     return { ok: false, message: 'A quantidade deve ser maior que zero.' }
   }
 
+  if (parsed > QUANTITY_MAX) {
+    return {
+      ok: false,
+      message: `A quantidade deve ser de no máximo ${QUANTITY_MAX}.`,
+    }
+  }
+
   return { ok: true, value: parsed }
 }
 
@@ -75,6 +84,13 @@ export function parseItemPrice(
 
   if (!Number.isFinite(parsed) || parsed < 0) {
     return { ok: false, message: 'O preço unitário não pode ser negativo.' }
+  }
+
+  if (parsed > PRICE_MAX) {
+    return {
+      ok: false,
+      message: `O preço unitário deve ser de no máximo ${PRICE_MAX}.`,
+    }
   }
 
   return { ok: true, value: parsed }
