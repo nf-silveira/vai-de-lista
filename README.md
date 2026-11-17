@@ -94,10 +94,6 @@ Todas as rotas de itens exigem sessão ativa.
 
 A SPA e a função `api/[...all].ts` sobem juntas na Vercel. Configure `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (domínio de produção) e os `SEED_USER_*` nas variáveis de ambiente do projeto; depois rode `npm run db:migrate` apontando para o banco de produção.
 
-## Documentação
-
-Contratos de produto/design e regras de engenharia em [`.docs/`](.docs/README.md).
-
 ## Git
 
 - Desenvolvimento em `develop`; `main` só recebe via Pull Request com `npm run verify` verde.
