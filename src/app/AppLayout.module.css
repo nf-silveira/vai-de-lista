@@ -1,0 +1,23 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--layout-mobile-width);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background-color: var(--color-bg);
+  border-inline: 1px solid var(--color-border);
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-md);
+}
+
+@media (max-width: 480px) {
+  .shell {
+    border-inline: none;
+  }
+}

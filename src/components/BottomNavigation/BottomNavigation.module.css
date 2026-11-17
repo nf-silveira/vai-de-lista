@@ -1,0 +1,43 @@
+.navigation {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  padding: var(--space-sm) var(--space-xs)
+    calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
+  background-color: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  z-index: 10;
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-xs) 0;
+  font-size: 11px;
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.link svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.link:hover {
+  color: var(--color-accent);
+  background-color: var(--color-accent-soft);
+}
+
+.active {
+  color: var(--color-accent);
+  font-weight: 600;
+}

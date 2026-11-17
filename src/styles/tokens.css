@@ -1,0 +1,65 @@
+/**
+ * Design tokens globais: cores, tipografia, espaçamento, raios e sombras.
+ * Paleta definida em .docs/contracts-app/01-design-ux-ui.md (caderno de compras).
+ */
+:root {
+  /* Cores — superfícies e texto */
+  --color-bg: #f5f0e6;
+  --color-surface: #fffcf5;
+  --color-bg-muted: #efe7d8;
+  --color-text: #756b5e;
+  --color-text-strong: #30291f;
+  --color-border: #e7ddcc;
+
+  /* Cores — semânticas */
+  --color-accent: #2868c7;
+  --color-accent-soft: rgba(40, 104, 199, 0.1);
+  --color-accent-border: rgba(40, 104, 199, 0.45);
+  --color-success: #2f8b57;
+  --color-danger: #c94b45;
+  --color-danger-soft: rgba(201, 75, 69, 0.1);
+  --color-highlight: #f5d98a;
+
+  /* Tipografia */
+  --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, Consolas, monospace;
+  --font-size-base: 17px;
+  --line-height-base: 1.5;
+
+  /* Espaçamento */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Formas e profundidade */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --shadow-soft:
+    rgba(48, 41, 31, 0.1) 0 10px 15px -3px,
+    rgba(48, 41, 31, 0.05) 0 4px 6px -2px;
+  --transition-fast: 0.2s ease;
+
+  /* Layout */
+  --layout-mobile-width: 480px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1b1915;
+    --color-surface: #232019;
+    --color-bg-muted: #2a261e;
+    --color-text: #b8ae9f;
+    --color-text-strong: #f4ece0;
+    --color-border: #3a342a;
+    --color-accent: #7aa7ec;
+    --color-accent-soft: rgba(122, 167, 236, 0.14);
+    --color-accent-border: rgba(122, 167, 236, 0.5);
+    --color-success: #6fc394;
+    --color-danger: #e8847e;
+    --color-danger-soft: rgba(232, 132, 126, 0.14);
+    --color-highlight: #c9a94a;
+  }
+}
