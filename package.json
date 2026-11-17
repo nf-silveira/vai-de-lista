@@ -10,6 +10,7 @@
     "db:migrate": "tsx --env-file=.env.local scripts/migrate.ts",
     "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
     "db:remove-seed": "tsx --env-file=.env.local scripts/removeSeedUsers.ts",
+    "db:reset-password": "tsx --env-file=.env.local scripts/resetPassword.ts",
     "db:setup-runtime-role": "tsx --env-file=.env.local scripts/setupRuntimeRole.ts",
     "typecheck": "tsc -b",
     "test": "node --import tsx --test \"src/**/*.test.ts\" \"server/**/*.test.ts\"",
