@@ -1,0 +1,17 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl) var(--space-md);
+  text-align: center;
+}
+
+.title {
+  font-size: 20px;
+}
+
+.description {
+  max-width: 34ch;
+  font-size: 15px;
+}

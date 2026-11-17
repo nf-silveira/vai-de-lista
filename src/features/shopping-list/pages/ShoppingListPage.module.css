@@ -1,0 +1,68 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding-bottom: var(--space-md);
+}
+
+.summary {
+  border-color: var(--color-border);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-soft),
+    var(--color-bg) 65%
+  );
+}
+
+.summaryLabel {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.summaryValue {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--color-text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.summaryHint {
+  font-size: 13px;
+}
+
+.summaryWarning {
+  margin-top: var(--space-xs);
+  font-size: 13px;
+  color: #8a5a00;
+  font-weight: 500;
+}
+
+.formCard {
+  border-color: var(--color-border);
+}
+
+.sectionTitle {
+  font-size: 15px;
+  margin-bottom: var(--space-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.listSection {
+  margin-top: var(--space-xs);
+}
+
+.list {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.empty {
+  padding: var(--space-lg);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  text-align: center;
+}

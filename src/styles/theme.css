@@ -1,0 +1,60 @@
+/**
+ * Ponte entre os design tokens e o Bootstrap: garante que componentes
+ * nativos (botões, cards, formulários) usem a paleta do projeto.
+ */
+:root {
+  --bs-body-bg: var(--color-bg);
+  --bs-body-color: var(--color-text);
+  --bs-body-font-family: var(--font-sans);
+  --bs-border-color: var(--color-border);
+  --bs-primary: var(--color-accent);
+  --bs-primary-rgb: 40, 104, 199;
+  --bs-border-radius: var(--radius-md);
+  --bs-link-color: var(--color-accent);
+  --bs-link-hover-color: var(--color-accent);
+}
+
+.card {
+  --bs-card-bg: var(--color-surface);
+  --bs-card-border-color: var(--color-border);
+}
+
+.list-group {
+  --bs-list-group-border-color: var(--color-border);
+  --bs-list-group-color: var(--color-text-strong);
+}
+
+.form-control {
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text-strong);
+}
+
+.form-control:focus {
+  border-color: var(--color-accent-border);
+  box-shadow: 0 0 0 0.2rem var(--color-accent-soft);
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--color-accent);
+  --bs-btn-border-color: var(--color-accent);
+  --bs-btn-hover-bg: #1f55a6;
+  --bs-btn-hover-border-color: #1f55a6;
+  --bs-btn-active-bg: #1a4a90;
+  --bs-btn-active-border-color: #1a4a90;
+  --bs-btn-disabled-bg: var(--color-accent);
+  --bs-btn-disabled-border-color: var(--color-accent);
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--color-text);
+  --bs-btn-border-color: var(--color-border);
+  --bs-btn-hover-bg: var(--color-bg-muted);
+  --bs-btn-hover-border-color: var(--color-border);
+  --bs-btn-hover-color: var(--color-text-strong);
+}
+
+.form-check-input:checked {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}

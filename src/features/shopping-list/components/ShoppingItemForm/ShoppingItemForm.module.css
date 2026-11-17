@@ -1,0 +1,21 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.nameField {
+  display: flex;
+  flex-direction: column;
+}
+
+.numericFields {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: var(--space-sm);
+}
+
+.validation {
+  font-size: 13px;
+  color: var(--color-danger);
+}
