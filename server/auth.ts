@@ -1,17 +1,16 @@
 import { betterAuth } from 'better-auth'
 import { APIError } from 'better-auth/api'
-import { pool } from './db'
+import { parseEmailList } from './access.js'
+import { pool } from './db.js'
 
 function readAllowedEmails(): string[] {
   const candidates = [
-    ...(process.env.ALLOWED_EMAILS ?? '').split(','),
+    process.env.ALLOWED_EMAILS ?? '',
     process.env.SEED_USER_1_EMAIL ?? '',
     process.env.SEED_USER_2_EMAIL ?? '',
   ]
 
-  return candidates
-    .map((email) => email.trim().toLowerCase())
-    .filter((email) => email.length > 0)
+  return parseEmailList(candidates.join(','))
 }
 
 const allowedEmails = readAllowedEmails()

@@ -1,6 +1,6 @@
 import { getMigrations } from 'better-auth/db/migration'
-import { auth } from '../server/auth'
-import { pool, query } from '../server/db'
+import { auth } from '../server/auth.js'
+import { pool, query } from '../server/db.js'
 
 const SHOPPING_ITEMS_TABLE = `
   create table if not exists shopping_items (

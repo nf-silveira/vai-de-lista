@@ -3,8 +3,8 @@ import type {
   NewShoppingItem,
   ShoppingItem,
   ShoppingItemPatch,
-} from '../shared/shopping-list'
-import { query } from './db'
+} from '../shared/shopping-list.js'
+import { query } from './db.js'
 
 interface ShoppingItemRow {
   id: string
