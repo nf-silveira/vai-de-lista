@@ -13,6 +13,7 @@ import {
   validateNewItem,
 } from './itemValidation.js'
 import { createRateLimiter, type RateLimiter } from './rateLimit.js'
+import { checkMemberAccess, readMemberEmails } from './access.js'
 
 export const app = express()
 
@@ -70,6 +71,15 @@ app.all('/api/auth/*splat', toNodeHandler(auth))
 
 app.use(express.json({ limit: '32kb' }))
 
+const memberEmails = readMemberEmails(process.env)
+const isProduction = process.env.NODE_ENV === 'production'
+
+if (memberEmails.length === 0) {
+  console.warn(
+    '[api] ALLOWED_EMAILS vazio: nenhuma conta acessa a lista em produção.',
+  )
+}
+
 async function requireSession(
   req: Request,
   res: Response,
@@ -81,6 +91,15 @@ async function requireSession(
 
   if (!session) {
     res.status(401).json({ error: 'Sessão expirada. Entre novamente.' })
+    return
+  }
+
+  const access = checkMemberAccess(session.user.email, memberEmails, {
+    isProduction,
+  })
+
+  if (!access.allowed) {
+    res.status(403).json({ error: 'Esta conta não tem acesso à lista.' })
     return
   }
 
