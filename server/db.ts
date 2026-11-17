@@ -1,4 +1,5 @@
 import { Pool } from 'pg'
+import { withExplicitSsl } from './pgConnection.js'
 
 const connectionString = process.env.DATABASE_URL
 
@@ -8,7 +9,9 @@ if (!connectionString) {
   )
 }
 
-export const pool = new Pool({ connectionString })
+export const pool = new Pool({
+  connectionString: withExplicitSsl(connectionString),
+})
 
 export async function query<T extends object>(
   text: string,

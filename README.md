@@ -64,6 +64,8 @@ npm run db:seed
 
 Em produção as migrations rodam com o owner (`MIGRATION_DATABASE_URL`) e a API conecta com um role só de `SELECT/INSERT/UPDATE/DELETE`, criado por `npm run db:setup-runtime-role`.
 
+As URLs do Neon vêm com `sslmode=require`. `server/pgConnection.ts` normaliza esse valor para `verify-full` antes de abrir o pool: é o comportamento atual do pg 8 tornado explícito, porque no pg 9 `require` deixa de validar a cadeia do certificado.
+
 ### Rotacionar a senha do role de runtime
 
 O script é idempotente: rodar de novo com a mesma senha não muda nada; com uma senha nova, troca a credencial e aplica os grants de novo.
