@@ -43,7 +43,9 @@ src/
 
 | Variável                                         | Uso                                              |
 | ------------------------------------------------ | ------------------------------------------------ |
-| `DATABASE_URL`                                   | string de conexão do Neon (obrigatória)          |
+| `DATABASE_URL`                                   | conexão do runtime; use o role de privilégio mínimo |
+| `MIGRATION_DATABASE_URL`                         | conexão do owner, usada só nas migrations        |
+| `APP_DB_USER` / `APP_DB_PASSWORD`                | role de runtime criado por `db:setup-runtime-role` |
 | `BETTER_AUTH_SECRET`                             | segredo de assinatura das sessões (obrigatória)  |
 | `BETTER_AUTH_URL`                                | URL do app (ex.: `http://localhost:5174`)        |
 | `ALLOWED_EMAILS`                                 | e-mails que acessam a lista (obrigatória em produção) |
@@ -60,6 +62,8 @@ npm run db:migrate
 npm run db:seed
 ```
 
+Em produção as migrations rodam com o owner (`MIGRATION_DATABASE_URL`) e a API conecta com um role só de `SELECT/INSERT/UPDATE/DELETE`, criado por `npm run db:setup-runtime-role`.
+
 ## Scripts
 
 | Script              | Descrição                                             |
@@ -72,6 +76,8 @@ npm run db:seed
 | `npm run verify`    | Lint + testes + build (usado antes do commit e no CI) |
 | `npm run db:migrate`| Cria/atualiza tabelas do auth e `shopping_items`      |
 | `npm run db:seed`   | Cria as duas contas permitidas                        |
+| `npm run db:remove-seed`| Apaga as contas de seed (idempotente)            |
+| `npm run db:setup-runtime-role`| Cria/atualiza o role de runtime com grants  |
 
 ## Autenticação
 
