@@ -16,6 +16,17 @@ function readAllowedEmails(): string[] {
 
 const allowedEmails = readAllowedEmails()
 
+function isSignUpAllowed(email: string): boolean {
+  if (allowedEmails.includes(email)) {
+    return true
+  }
+
+  const isLocalOrOptIn =
+    process.env.ALLOW_PUBLIC_SIGNUP === 'true' || process.env.NODE_ENV !== 'production'
+
+  return isLocalOrOptIn
+}
+
 export const auth = betterAuth({
   database: pool,
   secret: process.env.BETTER_AUTH_SECRET,
@@ -30,10 +41,10 @@ export const auth = betterAuth({
         before: async (user) => {
           const email = user.email.toLowerCase()
 
-          if (!allowedEmails.includes(email)) {
+          if (!isSignUpAllowed(email)) {
             throw new APIError('FORBIDDEN', {
               message:
-                'Este e-mail não está autorizado. O acesso é restrito às duas contas da casa.',
+                'Cadastro desativado. Este e-mail não está na lista de contas autorizadas.',
             })
           }
         },

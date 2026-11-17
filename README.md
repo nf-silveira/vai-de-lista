@@ -47,6 +47,7 @@ src/
 | `BETTER_AUTH_SECRET`                             | segredo de assinatura das sessões (obrigatória)  |
 | `BETTER_AUTH_URL`                                | URL do app (ex.: `http://localhost:5174`)        |
 | `ALLOWED_EMAILS`                                 | e-mails autorizados além das contas de seed      |
+| `ALLOW_PUBLIC_SIGNUP`                            | `true` libera o cadastro para qualquer e-mail    |
 | `SEED_USER_1_EMAIL` / `SEED_USER_1_PASSWORD`     | credenciais da primeira conta permitida          |
 | `SEED_USER_2_EMAIL` / `SEED_USER_2_PASSWORD`     | credenciais da segunda conta permitida           |
 
@@ -71,8 +72,9 @@ npm run db:seed
 
 ## Autenticação
 
-- Somente os e-mails de `ALLOWED_EMAILS` e das contas de seed podem se cadastrar; qualquer outro recebe `403`.
-- Não existe tela de cadastro: as duas contas são provisionadas por `npm run db:seed`.
+- Cadastro em `/cadastro` (Nome, E-mail e Senha) cria a conta já autenticada, com sessão em cookie do Better Auth.
+- Com `ALLOW_PUBLIC_SIGNUP=true` qualquer e-mail pode se cadastrar; sem ele, só os e-mails de `ALLOWED_EMAILS` e das contas de seed passam (os demais recebem `403`).
+- Em produção (`NODE_ENV=production`) o cadastro público só funciona com `ALLOW_PUBLIC_SIGNUP=true` explícito.
 - Sessão em cookie gerenciada pelo Better Auth; rotas do app passam por `ProtectedRoute`.
 
 ## API
