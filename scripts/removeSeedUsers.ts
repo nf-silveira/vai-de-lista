@@ -1,5 +1,6 @@
 import { parseEmailList } from '../server/access.js'
 import { pool } from '../server/db.js'
+import { removeSeedAccounts, selectSeedTargets } from '../server/seedCleanup.js'
 
 function readSeedEmails(): string[] {
   const candidates = [
@@ -20,9 +21,9 @@ async function run(): Promise<void> {
   }
 
   const memberEmails = parseEmailList(process.env.ALLOWED_EMAILS)
-  const targets = seedEmails.filter((email) => !memberEmails.includes(email))
+  const { targets, ignored } = selectSeedTargets(seedEmails, memberEmails)
 
-  for (const email of seedEmails.filter((email) => memberEmails.includes(email))) {
+  for (const email of ignored) {
     console.log(`Ignorada, está em ALLOWED_EMAILS: ${email}`)
   }
 
@@ -36,31 +37,15 @@ async function run(): Promise<void> {
   try {
     await client.query('begin')
 
-    const userIds = (
-      await client.query<{ id: string }>(
-        'select id from "user" where lower(email) = any($1::text[])',
-        [targets],
-      )
-    ).rows.map((row) => row.id)
-
-    if (userIds.length === 0) {
-      await client.query('commit')
-      console.log('Nada a remover: as contas de seed já não existem.')
-      return
-    }
-
-    await client.query('delete from session where "userId" = any($1::text[])', [
-      userIds,
-    ])
-    await client.query('delete from account where "userId" = any($1::text[])', [
-      userIds,
-    ])
-    await client.query('delete from "user" where id = any($1::text[])', [
-      userIds,
-    ])
+    const result = await removeSeedAccounts(client, targets)
 
     await client.query('commit')
-    console.log(`Contas removidas: ${userIds.length}`)
+
+    console.log(
+      result.alreadyGone
+        ? 'Nada a remover: as contas de seed já não existem.'
+        : `Contas removidas: ${result.removed}`,
+    )
   } catch (error) {
     await client.query('rollback')
     throw error
