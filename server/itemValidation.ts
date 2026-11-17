@@ -4,11 +4,13 @@ import {
   type ItemUnit,
   type NewShoppingItem,
   type ShoppingItemPatch,
-} from '../shared/shopping-list'
+} from '../shared/shopping-list.js'
+
+export type ValidationFailure = { ok: false; message: string; value?: undefined }
 
 export type ValidationResult<T> =
-  | { ok: true; value: T }
-  | { ok: false; message: string }
+  | { ok: true; value: T; message?: undefined }
+  | ValidationFailure
 
 const NAME_MIN_LENGTH = 2
 const NAME_MAX_LENGTH = 80
@@ -88,16 +90,18 @@ export function validateNewItem(
   const { name, quantity, unit, unitPrice } = body as Record<string, unknown>
 
   const nameResult = parseItemName(name)
-  if (!nameResult.ok) return nameResult
+  if (!nameResult.ok) return { ok: false, message: nameResult.message }
 
   const quantityResult = parseItemQuantity(quantity)
-  if (!quantityResult.ok) return quantityResult
+  if (!quantityResult.ok) {
+    return { ok: false, message: quantityResult.message }
+  }
 
   const unitResult = parseItemUnit(unit)
-  if (!unitResult.ok) return unitResult
+  if (!unitResult.ok) return { ok: false, message: unitResult.message }
 
   const priceResult = parseItemPrice(unitPrice)
-  if (!priceResult.ok) return priceResult
+  if (!priceResult.ok) return { ok: false, message: priceResult.message }
 
   return {
     ok: true,
@@ -133,31 +137,35 @@ export function validateItemPatch(
 
   if (name !== undefined) {
     const nameResult = parseItemName(name)
-    if (!nameResult.ok) return nameResult
+    if (!nameResult.ok) return { ok: false, message: nameResult.message }
     patch.name = nameResult.value
   }
 
   if (quantity !== undefined) {
     const quantityResult = parseItemQuantity(quantity)
-    if (!quantityResult.ok) return quantityResult
+    if (!quantityResult.ok) {
+      return { ok: false, message: quantityResult.message }
+    }
     patch.quantity = quantityResult.value
   }
 
   if (unit !== undefined) {
     const unitResult = parseItemUnit(unit)
-    if (!unitResult.ok) return unitResult
+    if (!unitResult.ok) return { ok: false, message: unitResult.message }
     patch.unit = unitResult.value
   }
 
   if (unitPrice !== undefined) {
     const priceResult = parseItemPrice(unitPrice)
-    if (!priceResult.ok) return priceResult
+    if (!priceResult.ok) return { ok: false, message: priceResult.message }
     patch.unitPrice = priceResult.value
   }
 
   if (isChecked !== undefined) {
     const checkedResult = parseChecked(isChecked)
-    if (!checkedResult.ok) return checkedResult
+    if (!checkedResult.ok) {
+      return { ok: false, message: checkedResult.message }
+    }
     patch.isChecked = checkedResult.value
   }
 

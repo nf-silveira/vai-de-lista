@@ -1,17 +1,17 @@
 import express, { type NextFunction, type Request, type Response } from 'express'
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node'
-import { auth } from './auth'
+import { auth } from './auth.js'
 import {
   createShoppingItem,
   deleteShoppingItem,
   listShoppingItems,
   updateShoppingItem,
-} from './items'
+} from './items.js'
 import {
   isValidItemId,
   validateItemPatch,
   validateNewItem,
-} from './itemValidation'
+} from './itemValidation.js'
 
 export const app = express()
 

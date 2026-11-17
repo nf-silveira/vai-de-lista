@@ -1,6 +1,6 @@
 import { betterAuth } from 'better-auth'
 import { APIError } from 'better-auth/api'
-import { pool } from './db'
+import { pool } from './db.js'
 
 function readAllowedEmails(): string[] {
   const candidates = [
