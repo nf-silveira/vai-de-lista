@@ -4,7 +4,7 @@ import {
   isValidItemId,
   validateItemPatch,
   validateNewItem,
-} from './itemValidation'
+} from './itemValidation.js'
 
 describe('validateNewItem', () => {
   it('aplica unidade e preço padrão', () => {

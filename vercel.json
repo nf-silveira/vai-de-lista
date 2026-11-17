@@ -4,10 +4,5 @@
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/[...all]" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
-  ],
-  "git": {
-    "deploymentEnabled": {
-      "main": false
-    }
-  }
+  ]
 }

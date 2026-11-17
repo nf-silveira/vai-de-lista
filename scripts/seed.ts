@@ -1,5 +1,5 @@
-import { auth } from '../server/auth'
-import { pool, query } from '../server/db'
+import { auth } from '../server/auth.js'
+import { pool, query } from '../server/db.js'
 
 interface SeedUser {
   email: string
