@@ -8,5 +8,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), devApiPlugin()],
+    server: {
+      port: 5174,
+      strictPort: true,
+    },
   }
 })

@@ -45,7 +45,7 @@ src/
 | ------------------------------------------------ | ------------------------------------------------ |
 | `DATABASE_URL`                                   | string de conexão do Neon (obrigatória)          |
 | `BETTER_AUTH_SECRET`                             | segredo de assinatura das sessões (obrigatória)  |
-| `BETTER_AUTH_URL`                                | URL do app (ex.: `http://localhost:5173`)        |
+| `BETTER_AUTH_URL`                                | URL do app (ex.: `http://localhost:5174`)        |
 | `ALLOWED_EMAILS`                                 | e-mails autorizados além das contas de seed      |
 | `SEED_USER_1_EMAIL` / `SEED_USER_1_PASSWORD`     | credenciais da primeira conta permitida          |
 | `SEED_USER_2_EMAIL` / `SEED_USER_2_PASSWORD`     | credenciais da segunda conta permitida           |
@@ -61,7 +61,7 @@ npm run db:seed
 
 | Script              | Descrição                                             |
 | ------------------- | ----------------------------------------------------- |
-| `npm run dev`       | App + API (Express montada no dev server do Vite)     |
+| `npm run dev`       | App + API na porta fixa `5174` (Vite + Express)       |
 | `npm run build`     | Checagem de tipos (`tsc -b`) e build de produção      |
 | `npm run lint`      | ESLint em todo o projeto                              |
 | `npm run typecheck` | Somente a checagem de tipos                           |
