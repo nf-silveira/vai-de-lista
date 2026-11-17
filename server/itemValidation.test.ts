@@ -115,3 +115,52 @@ describe('isValidItemId', () => {
     assert.equal(isValidItemId('drop table shopping_items'), false)
   })
 })
+
+describe('limites de tamanho', () => {
+  it('rejeita quantidade acima do limite', () => {
+    const result = validateNewItem({ name: 'Arroz', quantity: 1_000_000 })
+
+    assert.deepEqual(result, {
+      ok: false,
+      message: 'A quantidade deve ser de no máximo 999999.',
+    })
+  })
+
+  it('rejeita preço acima do limite', () => {
+    const result = validateNewItem({ name: 'Arroz', unitPrice: 1_000_000 })
+
+    assert.deepEqual(result, {
+      ok: false,
+      message: 'O preço unitário deve ser de no máximo 999999.99.',
+    })
+  })
+
+  it('rejeita nome acima do limite', () => {
+    const result = validateNewItem({ name: 'a'.repeat(81) })
+
+    assert.equal(result.ok, false)
+  })
+
+  it('rejeita quantidade infinita', () => {
+    const result = validateNewItem({ name: 'Arroz', quantity: Number.POSITIVE_INFINITY })
+
+    assert.equal(result.ok, false)
+  })
+
+  it('não interpreta conteúdo injetado como comando', () => {
+    const result = validateNewItem({
+      name: "Arroz'; drop table shopping_items; --",
+      quantity: 1,
+    })
+
+    assert.deepEqual(result, {
+      ok: true,
+      value: {
+        name: "Arroz'; drop table shopping_items; --",
+        quantity: 1,
+        unit: 'un',
+        unitPrice: null,
+      },
+    })
+  })
+})
