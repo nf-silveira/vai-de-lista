@@ -4,12 +4,14 @@ import { auth } from './auth'
 import {
   createShoppingItem,
   deleteShoppingItem,
-  isValidItemId,
   listShoppingItems,
-  setShoppingItemChecked,
-  validateCheckedPatch,
-  validateNewItem,
+  updateShoppingItem,
 } from './items'
+import {
+  isValidItemId,
+  validateItemPatch,
+  validateNewItem,
+} from './itemValidation'
 
 export const app = express()
 
@@ -59,14 +61,14 @@ app.patch<{ id: string }>('/api/items/:id', requireSession, async (req, res) => 
     return
   }
 
-  const validation = validateCheckedPatch(req.body)
+  const validation = validateItemPatch(req.body)
 
   if (!validation.ok) {
     res.status(400).json({ error: validation.message })
     return
   }
 
-  const item = await setShoppingItemChecked(id, validation.value)
+  const item = await updateShoppingItem(id, validation.value)
 
   if (!item) {
     res.status(404).json({ error: 'Item não encontrado.' })

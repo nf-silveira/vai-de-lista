@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type {
   NewShoppingItem,
   ShoppingItem,
+  ShoppingItemPatch,
 } from '../../../../shared/shopping-list'
 import { shoppingListApi } from '../services/shoppingListApi'
 
@@ -59,23 +60,35 @@ export function useShoppingItems() {
     }
   }, [])
 
-  const toggleItem = useCallback(async (item: ShoppingItem) => {
-    setBusyItemId(item.id)
-    setErrorMessage(null)
+  const updateItem = useCallback(
+    async (item: ShoppingItem, patch: ShoppingItemPatch) => {
+      setBusyItemId(item.id)
+      setErrorMessage(null)
 
-    try {
-      const updated = await shoppingListApi.setChecked(item.id, !item.isChecked)
-      setItems((current) =>
-        current.map((currentItem) =>
-          currentItem.id === updated.id ? updated : currentItem,
-        ),
-      )
-    } catch (error: unknown) {
-      setErrorMessage(describeError(error))
-    } finally {
-      setBusyItemId(null)
-    }
-  }, [])
+      try {
+        const updated = await shoppingListApi.update(item.id, patch)
+        setItems((current) =>
+          current.map((currentItem) =>
+            currentItem.id === updated.id ? updated : currentItem,
+          ),
+        )
+        return true
+      } catch (error: unknown) {
+        setErrorMessage(describeError(error))
+        return false
+      } finally {
+        setBusyItemId(null)
+      }
+    },
+    [],
+  )
+
+  const toggleItem = useCallback(
+    async (item: ShoppingItem) => {
+      await updateItem(item, { isChecked: !item.isChecked })
+    },
+    [updateItem],
+  )
 
   const removeItem = useCallback(async (item: ShoppingItem) => {
     setBusyItemId(item.id)
@@ -100,6 +113,7 @@ export function useShoppingItems() {
     isAdding,
     busyItemId,
     addItem,
+    updateItem,
     toggleItem,
     removeItem,
   }

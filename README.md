@@ -66,7 +66,8 @@ npm run db:seed
 | `npm run build`     | Checagem de tipos (`tsc -b`) e build de produção      |
 | `npm run lint`      | ESLint em todo o projeto                              |
 | `npm run typecheck` | Somente a checagem de tipos                           |
-| `npm run verify`    | Lint + build (usado antes do commit)                  |
+| `npm run test`      | Testes de totalização e validação (`node:test`)       |
+| `npm run verify`    | Lint + testes + build (usado antes do commit e no CI) |
 | `npm run db:migrate`| Cria/atualiza tabelas do auth e `shopping_items`      |
 | `npm run db:seed`   | Cria as duas contas permitidas                        |
 
@@ -84,8 +85,8 @@ Todas as rotas de itens exigem sessão ativa.
 | Método   | Rota             | Descrição                         |
 | -------- | ---------------- | --------------------------------- |
 | `GET`    | `/api/items`     | Lista compartilhada               |
-| `POST`   | `/api/items`     | Adiciona item (nome, qtd, preço)  |
-| `PATCH`  | `/api/items/:id` | Marca como comprado (`isChecked`) |
+| `POST`   | `/api/items`     | Adiciona item (nome, qtd, un., preço) |
+| `PATCH`  | `/api/items/:id` | Edita campos parciais do item (`name`, `quantity`, `unit`, `unitPrice`, `isChecked`) |
 | `DELETE` | `/api/items/:id` | Remove item                       |
 | `*`      | `/api/auth/*`    | Better Auth                       |
 
