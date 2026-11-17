@@ -1,5 +1,5 @@
 import express, { type NextFunction, type Request, type Response } from 'express'
-import { fromNodeHeaders, toNodeHandler } from 'better-auth/node'
+import { toNodeHandler } from 'better-auth/node'
 import { auth } from './auth.js'
 import {
   createShoppingItem,
@@ -13,7 +13,8 @@ import {
   validateNewItem,
 } from './itemValidation.js'
 import { createRateLimiter, type RateLimiter } from './rateLimit.js'
-import { checkMemberAccess, readMemberEmails } from './access.js'
+import { readMemberEmails } from './access.js'
+import { createSessionGuard } from './sessionGuard.js'
 
 export const app = express()
 
@@ -80,32 +81,11 @@ if (memberEmails.length === 0) {
   )
 }
 
-async function requireSession(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  const session = await auth.api.getSession({
-    headers: fromNodeHeaders(req.headers),
-  })
-
-  if (!session) {
-    res.status(401).json({ error: 'Sessão expirada. Entre novamente.' })
-    return
-  }
-
-  const access = checkMemberAccess(session.user.email, memberEmails, {
-    isProduction,
-  })
-
-  if (!access.allowed) {
-    res.status(403).json({ error: 'Esta conta não tem acesso à lista.' })
-    return
-  }
-
-  res.locals.userId = session.user.id
-  next()
-}
+const requireSession = createSessionGuard({
+  getSession: (headers) => auth.api.getSession({ headers }),
+  memberEmails,
+  isProduction,
+})
 
 app.get('/api/items', requireSession, async (_req, res) => {
   res.json({ items: await listShoppingItems() })

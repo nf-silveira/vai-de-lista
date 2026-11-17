@@ -1,6 +1,14 @@
-import { getMigrations } from 'better-auth/db/migration'
-import { auth } from '../server/auth.js'
-import { pool, query } from '../server/db.js'
+/**
+ * Migrations rodam com o role owner, via `MIGRATION_DATABASE_URL`; o runtime
+ * usa `DATABASE_URL`, que deve apontar para o role de privilégio mínimo.
+ */
+function preferOwnerConnection(): void {
+  const ownerUrl = process.env.MIGRATION_DATABASE_URL
+
+  if (ownerUrl) {
+    process.env.DATABASE_URL = ownerUrl
+  }
+}
 
 const SHOPPING_ITEMS_TABLE = `
   create table if not exists shopping_items (
@@ -21,18 +29,26 @@ const SHOPPING_ITEMS_UNIT_COLUMN = `
 `
 
 async function run(): Promise<void> {
-  const { runMigrations } = await getMigrations(auth.options)
-  await runMigrations()
-  console.log('Tabelas de autenticação do Better Auth aplicadas.')
+  preferOwnerConnection()
 
-  await query(SHOPPING_ITEMS_TABLE)
-  await query(SHOPPING_ITEMS_UNIT_COLUMN)
-  console.log('Tabela shopping_items aplicada.')
+  const { getMigrations } = await import('better-auth/db/migration')
+  const { auth } = await import('../server/auth.js')
+  const { pool, query } = await import('../server/db.js')
+
+  try {
+    const { runMigrations } = await getMigrations(auth.options)
+    await runMigrations()
+    console.log('Tabelas de autenticação do Better Auth aplicadas.')
+
+    await query(SHOPPING_ITEMS_TABLE)
+    await query(SHOPPING_ITEMS_UNIT_COLUMN)
+    console.log('Tabela shopping_items aplicada.')
+  } finally {
+    await pool.end()
+  }
 }
 
-run()
-  .catch((error: unknown) => {
-    console.error('Falha ao migrar o banco:', error)
-    process.exitCode = 1
-  })
-  .finally(() => pool.end())
+run().catch((error: unknown) => {
+  console.error('Falha ao migrar o banco:', error)
+  process.exitCode = 1
+})
