@@ -1,0 +1,62 @@
+.row {
+  padding-inline: var(--space-md);
+  background-color: var(--color-bg);
+}
+
+.checked {
+  background-color: var(--color-bg-muted);
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.name {
+  font-size: 15px;
+  color: var(--color-text-strong);
+  overflow-wrap: anywhere;
+}
+
+.checked .name {
+  text-decoration: line-through;
+  color: var(--color-text);
+}
+
+.details {
+  font-size: 12px;
+  color: var(--color-text);
+}
+
+.subtotal {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-strong);
+  white-space: nowrap;
+}
+
+.removeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 22px;
+  line-height: 1;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.removeButton:hover:not(:disabled) {
+  background-color: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.removeButton:disabled {
+  opacity: 0.5;
+}

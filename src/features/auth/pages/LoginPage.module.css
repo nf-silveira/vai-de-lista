@@ -1,0 +1,39 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-lg);
+  width: 100%;
+  max-width: var(--layout-mobile-width);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md);
+}
+
+.brand {
+  text-align: center;
+}
+
+.title {
+  font-size: 32px;
+  letter-spacing: -0.03em;
+  color: var(--color-accent);
+}
+
+.slogan {
+  font-size: 14px;
+}
+
+.card {
+  width: 100%;
+  border-color: var(--color-border);
+}
+
+.cardTitle {
+  font-size: 20px;
+}
+
+.cardHint {
+  font-size: 13px;
+  margin-top: var(--space-xs);
+}
