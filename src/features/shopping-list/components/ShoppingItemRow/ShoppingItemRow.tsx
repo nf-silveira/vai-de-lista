@@ -1,13 +1,19 @@
-import type { ShoppingItem } from '../../../../../shared/shopping-list'
+import { useState } from 'react'
+import type {
+  ShoppingItem,
+  ShoppingItemPatch,
+} from '../../../../../shared/shopping-list'
 import {
   formatCurrency,
   formatQuantity,
 } from '../../utils/summarizeItems'
+import { ShoppingItemEditor } from '../ShoppingItemEditor/ShoppingItemEditor'
 import styles from './ShoppingItemRow.module.css'
 
 interface ShoppingItemRowProps {
   item: ShoppingItem
   onToggle: (item: ShoppingItem) => void
+  onUpdate: (item: ShoppingItem, patch: ShoppingItemPatch) => Promise<boolean>
   onRemove: (item: ShoppingItem) => void
   isBusy: boolean
 }
@@ -15,13 +21,35 @@ interface ShoppingItemRowProps {
 export function ShoppingItemRow({
   item,
   onToggle,
+  onUpdate,
   onRemove,
   isBusy,
 }: ShoppingItemRowProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [isConfirmingRemove, setIsConfirmingRemove] = useState(false)
+
   const details =
     item.unitPrice === null
-      ? `${formatQuantity(item.quantity)} un · sem preço`
-      : `${formatQuantity(item.quantity)} un × ${formatCurrency(item.unitPrice)}`
+      ? `${formatQuantity(item.quantity)} ${item.unit} · sem preço`
+      : `${formatQuantity(item.quantity)} ${item.unit} × ${formatCurrency(item.unitPrice)}`
+
+  if (isEditing) {
+    return (
+      <li className={`list-group-item ${styles.row}`}>
+        <ShoppingItemEditor
+          item={item}
+          isBusy={isBusy}
+          onCancel={() => setIsEditing(false)}
+          onSave={(patch) => onUpdate(item, patch)}
+        />
+      </li>
+    )
+  }
+
+  function handleConfirmRemove() {
+    setIsConfirmingRemove(false)
+    onRemove(item)
+  }
 
   return (
     <li
@@ -50,15 +78,48 @@ export function ShoppingItemRow({
           : formatCurrency(item.quantity * item.unitPrice)}
       </span>
 
-      <button
-        type="button"
-        className={styles.removeButton}
-        onClick={() => onRemove(item)}
-        disabled={isBusy}
-        aria-label={`Remover ${item.name}`}
-      >
-        ×
-      </button>
+      <div className={styles.actions}>
+        <button
+          type="button"
+          className={styles.actionButton}
+          onClick={() => setIsEditing(true)}
+          disabled={isBusy}
+          aria-label={`Editar ${item.name}`}
+        >
+          Editar
+        </button>
+        <button
+          type="button"
+          className={styles.removeButton}
+          onClick={() => setIsConfirmingRemove(true)}
+          disabled={isBusy}
+          aria-label={`Remover ${item.name}`}
+        >
+          ×
+        </button>
+      </div>
+
+      {isConfirmingRemove && (
+        <div className={styles.confirmBar} role="group" aria-label="Confirmar remoção">
+          <span className={styles.confirmText}>Remover {item.name}?</span>
+          <button
+            type="button"
+            className="btn btn-sm btn-danger"
+            onClick={handleConfirmRemove}
+            disabled={isBusy}
+          >
+            Remover
+          </button>
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-secondary"
+            onClick={() => setIsConfirmingRemove(false)}
+            disabled={isBusy}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
     </li>
   )
 }

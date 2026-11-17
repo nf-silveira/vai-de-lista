@@ -1,12 +1,14 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PlaceholderPage } from '../components/PlaceholderPage/PlaceholderPage'
 import { LoginPage } from '../features/auth/pages/LoginPage'
+import { SignUpPage } from '../features/auth/pages/SignUpPage'
 import { ShoppingListPage } from '../features/shopping-list/pages/ShoppingListPage'
 import { AppLayout } from './AppLayout'
 import { ProtectedRoute } from './ProtectedRoute'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
+  { path: '/cadastro', element: <SignUpPage /> },
   {
     element: <ProtectedRoute />,
     children: [

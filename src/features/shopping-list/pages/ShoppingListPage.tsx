@@ -13,6 +13,7 @@ export function ShoppingListPage() {
     isAdding,
     busyItemId,
     addItem,
+    updateItem,
     toggleItem,
     removeItem,
   } = useShoppingItems()
@@ -70,6 +71,7 @@ export function ShoppingListPage() {
                 key={item.id}
                 item={item}
                 onToggle={toggleItem}
+                onUpdate={updateItem}
                 onRemove={removeItem}
                 isBusy={busyItemId === item.id}
               />
