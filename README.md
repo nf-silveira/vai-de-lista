@@ -43,7 +43,9 @@ src/
 
 | Variável                                         | Uso                                              |
 | ------------------------------------------------ | ------------------------------------------------ |
-| `DATABASE_URL`                                   | string de conexão do Neon (obrigatória)          |
+| `DATABASE_URL`                                   | conexão do runtime; use o role de privilégio mínimo |
+| `MIGRATION_DATABASE_URL`                         | conexão do owner, usada só nas migrations        |
+| `APP_DB_USER` / `APP_DB_PASSWORD`                | role de runtime criado por `db:setup-runtime-role` |
 | `BETTER_AUTH_SECRET`                             | segredo de assinatura das sessões (obrigatória)  |
 | `BETTER_AUTH_URL`                                | URL do app (ex.: `http://localhost:5174`)        |
 | `ALLOWED_EMAILS`                                 | e-mails que acessam a lista (obrigatória em produção) |
@@ -60,6 +62,25 @@ npm run db:migrate
 npm run db:seed
 ```
 
+Em produção as migrations rodam com o owner (`MIGRATION_DATABASE_URL`) e a API conecta com um role só de `SELECT/INSERT/UPDATE/DELETE`, criado por `npm run db:setup-runtime-role`.
+
+### Rotacionar a senha do role de runtime
+
+O script é idempotente: rodar de novo com a mesma senha não muda nada; com uma senha nova, troca a credencial e aplica os grants de novo.
+
+```bash
+# 1. defina a nova senha (mínimo 24 caracteres) no .env.local, em APP_DB_PASSWORD
+npm run db:setup-runtime-role
+
+# 2. atualize a DATABASE_URL local e a da Vercel com a senha nova
+vercel env rm DATABASE_URL production
+vercel env add DATABASE_URL production
+
+# 3. redeploy para a função serverless reconectar
+```
+
+Repita o passo 2 para o ambiente `preview`. A senha do owner (`MIGRATION_DATABASE_URL`) não é alterada por esse script: se precisar trocá-la, faça no console do Neon e atualize a variável. Depois da troca, valide com `curl -i https://vai-de-lista.vercel.app/api/items` (esperado `401` sem sessão, e nenhum `permission denied` nos logs).
+
 ## Scripts
 
 | Script              | Descrição                                             |
@@ -72,6 +93,9 @@ npm run db:seed
 | `npm run verify`    | Lint + testes + build (usado antes do commit e no CI) |
 | `npm run db:migrate`| Cria/atualiza tabelas do auth e `shopping_items`      |
 | `npm run db:seed`   | Cria as duas contas permitidas                        |
+| `npm run db:remove-seed`| Apaga as contas de seed (idempotente)            |
+| `npm run db:reset-password`| Redefine a senha de uma conta existente     |
+| `npm run db:setup-runtime-role`| Cria/atualiza o role de runtime com grants  |
 
 ## Autenticação
 
@@ -79,6 +103,13 @@ npm run db:seed
 - Com `ALLOW_PUBLIC_SIGNUP=true` qualquer e-mail pode se cadastrar; sem ele, só os e-mails de `ALLOWED_EMAILS` e das contas de seed passam (os demais recebem `403`).
 - Em produção (`NODE_ENV=production`) o cadastro público só funciona com `ALLOW_PUBLIC_SIGNUP=true` explícito.
 - Sessão em cookie gerenciada pelo Better Auth; rotas do app passam por `ProtectedRoute`.
+- Não há recuperação de senha por e-mail. Se a senha de um membro se perder, redefina pela máquina de confiança:
+
+```bash
+RESET_USER_EMAIL=alguem@exemplo.com RESET_USER_PASSWORD='nova-senha-com-8+' npm run db:reset-password
+```
+
+O comando grava o hash do Better Auth, encerra as sessões abertas daquela conta e avisa quando o e-mail não existe ou a conta não tem credencial de senha.
 
 ## API
 
