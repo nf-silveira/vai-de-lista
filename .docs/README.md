@@ -8,10 +8,11 @@
 
 ## Stack definida
 
-- React + TypeScript
-- Supabase (PostgreSQL, Auth opcional na primeira versão, Row Level Security)
-- CSS próprio + Bootstrap
-- React Icons
+- React 19 + TypeScript + Vite
+- Neon PostgreSQL (acesso exclusivo pela API)
+- Better Auth (e-mail/senha, duas contas autorizadas)
+- Bootstrap + CSS Modules com design tokens
+- React Router
 
 ## Como usar esta documentação com seu agente
 
@@ -30,7 +31,7 @@
 | `docs/00-visao-geral.md`                   | Objetivo, escopo e requisitos                |
 | `docs/01-design-ux-ui.md`                  | Direção visual e especificação das telas     |
 | `docs/02-arquitetura.md`                   | Estrutura técnica, pastas e padrões          |
-| `docs/03-modelagem-supabase.md`            | Banco de dados, SQL inicial e segurança      |
+| `docs/03-modelagem-postgres.md`            | Banco de dados, SQL inicial e segurança      |
 | `docs/04-regras-de-negocio.md`             | Cálculos, comparação de preços e estados     |
 | `docs/05-plano-de-implementacao.md`        | Etapas incrementais e prompts                |
 | `docs/06-qualidade-e-checklist.md`         | Clean code, refactoring, acessibilidade e QA |

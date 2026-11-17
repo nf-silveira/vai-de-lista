@@ -6,7 +6,7 @@
 **Objetivo:** preparar a base sem implementar regras complexas.
 
 Prompt para o agente:
-> Leia `README.md` e os documentos `00`, `01`, `02` e `06`. Analise o repositório antes de alterar qualquer arquivo. Configure ou ajuste React + TypeScript + Vite, Bootstrap, React Icons e CSS tokens. Crie a estrutura de pastas definida em `02-arquitetura.md`. Implemente layout mobile-first com cabeçalho, área de conteúdo e navegação inferior (Lista, Histórico, Comparar, Ajustes), usando dados estáticos. Reproduza fielmente a direção visual de `01-design-ux-ui.md` e `07-prompt-visual-alta-fidelidade.md`. Não conecte Supabase ainda. Não implemente funcionalidades futuras. Garanta responsividade, estados de foco e alvos de toque. Execute lint/typecheck/build e informe os resultados.
+> Leia `README.md` e os documentos `00`, `01`, `02` e `06`. Analise o repositório antes de alterar qualquer arquivo. Configure ou ajuste React + TypeScript + Vite, Bootstrap, React Icons e CSS tokens. Crie a estrutura de pastas definida em `02-arquitetura.md`. Implemente layout mobile-first com cabeçalho, área de conteúdo e navegação inferior (Lista, Histórico, Comparar, Ajustes), usando dados estáticos. Reproduza fielmente a direção visual de `01-design-ux-ui.md` e `07-prompt-visual-alta-fidelidade.md`. Não conecte banco nem autenticação ainda. Não implemente funcionalidades futuras. Garanta responsividade, estados de foco e alvos de toque. Execute lint/typecheck/build e informe os resultados.
 
 Critérios de aceite:
 - Aplicação inicia sem erro.
@@ -24,13 +24,13 @@ Aceite:
 - Edição mantém os dados corretos.
 - Exclusão tem confirmação/desfazer.
 
-## Etapa 3 — Supabase e persistência
+## Etapa 3 — Neon, Better Auth e persistência
 Prompt:
-> Integre Supabase à feature existente sem reescrever a interface. Leia `03-modelagem-supabase.md`; confira o schema real e gere/atualize tipos. Implemente client seguro, serviços e tratamento de loading/erro. Aplique RLS e nunca exponha service role. Se autenticação ainda não existir, proponha e implemente uma estratégia coerente antes de gravar dados multiusuário. Não desative RLS para facilitar o desenvolvimento. Teste CRUD da lista e itens.
+> Integre o banco à feature existente sem reescrever a interface. Leia `03-modelagem-postgres.md`; confira o schema real e mantenha as migrations em `scripts/`. Toda escrita passa pela API (`server/`), com sessão do Better Auth validada antes da query; o cliente nunca acessa o banco. Implemente serviços no frontend e tratamento de loading/erro. Nunca exponha `DATABASE_URL` no bundle. Teste CRUD da lista e itens, incluindo requisição sem sessão.
 
 Aceite:
-- Criar, ler, atualizar e excluir dados do usuário autenticado.
-- Usuário não acessa dados de outro usuário.
+- Criar, ler, atualizar e excluir dados da lista compartilhada autenticada.
+- Requisição sem sessão recebe `401`; payload inválido recebe `400`.
 - Erros de rede não apagam o estado digitado.
 - Chaves secretas não aparecem no bundle.
 
