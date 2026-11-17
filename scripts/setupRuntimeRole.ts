@@ -1,4 +1,5 @@
 import { Pool } from 'pg'
+import { withExplicitSsl } from '../server/pgConnection.js'
 
 const SETTINGS_SQL = `
   select set_config('app.runtime_role', $1, false),
@@ -56,7 +57,7 @@ async function run(): Promise<void> {
     throw new Error('Defina MIGRATION_DATABASE_URL (owner) ou DATABASE_URL.')
   }
 
-  const ownerPool = new Pool({ connectionString })
+  const ownerPool = new Pool({ connectionString: withExplicitSsl(connectionString) })
   const client = await ownerPool.connect()
 
   try {
