@@ -1,5 +1,4 @@
 import { betterAuth } from 'better-auth'
-import { APIError } from 'better-auth/api'
 import { username } from 'better-auth/plugins'
 import { Resend } from 'resend'
 import {
@@ -7,21 +6,11 @@ import {
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
 } from '../shared/username.js'
-import { parseEmailList } from './access.js'
-import { pool } from './db.js'
+import { isAutoApproved, readAutoApprovedEmails } from './access.js'
+import { pool, query } from './db.js'
 import { createPasswordResetEmailSender } from './passwordResetEmail.js'
 
-function readAllowedEmails(): string[] {
-  const candidates = [
-    process.env.ALLOWED_EMAILS ?? '',
-    process.env.SEED_USER_1_EMAIL ?? '',
-    process.env.SEED_USER_2_EMAIL ?? '',
-  ]
-
-  return parseEmailList(candidates.join(','))
-}
-
-const allowedEmails = readAllowedEmails()
+const autoApprovedEmails = readAutoApprovedEmails(process.env)
 const isProduction = process.env.NODE_ENV === 'production'
 
 const secret = process.env.BETTER_AUTH_SECRET ?? ''
@@ -30,17 +19,6 @@ if (isProduction && secret.length < 32) {
   throw new Error(
     'BETTER_AUTH_SECRET ausente ou curto demais. Use pelo menos 32 caracteres em produção.',
   )
-}
-
-function isSignUpAllowed(email: string): boolean {
-  if (allowedEmails.includes(email)) {
-    return true
-  }
-
-  const isLocalOrOptIn =
-    process.env.ALLOW_PUBLIC_SIGNUP === 'true' || !isProduction
-
-  return isLocalOrOptIn
 }
 
 const sendPasswordResetEmail = createPasswordResetEmailSender({
@@ -77,15 +55,15 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        before: async (user) => {
-          const email = user.email.toLowerCase()
+        // Toda conta nasce pendente e só entra na lista depois da aprovação do
+        // administrador. Os e-mails de confiança já nascem aprovados.
+        after: async (user) => {
+          if (!isAutoApproved(user.email, autoApprovedEmails)) return
 
-          if (!isSignUpAllowed(email)) {
-            throw new APIError('FORBIDDEN', {
-              message:
-                'Cadastro desativado. Este e-mail não está na lista de contas autorizadas.',
-            })
-          }
+          await query(
+            'update "user" set status = $1, "updatedAt" = now() where id = $2',
+            ['active', user.id],
+          )
         },
       },
     },

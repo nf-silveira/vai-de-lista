@@ -13,7 +13,8 @@ import {
   validateNewItem,
 } from './itemValidation.js'
 import { createRateLimiter, type RateLimiter } from './rateLimit.js'
-import { readMemberEmails } from './access.js'
+import { adminRouter } from './admin.js'
+import { findAccountById, findAccountState } from './accounts.js'
 import { createSessionGuard } from './sessionGuard.js'
 
 export const app = express()
@@ -82,20 +83,33 @@ app.all('/api/auth/*splat', toNodeHandler(auth))
 
 app.use(express.json({ limit: '32kb' }))
 
-const memberEmails = readMemberEmails(process.env)
-const isProduction = process.env.NODE_ENV === 'production'
-
-if (memberEmails.length === 0) {
-  console.warn(
-    '[api] ALLOWED_EMAILS vazio: nenhuma conta acessa a lista em produção.',
-  )
-}
+const getSession = (headers: Headers) => auth.api.getSession({ headers })
 
 const requireSession = createSessionGuard({
-  getSession: (headers) => auth.api.getSession({ headers }),
-  memberEmails,
-  isProduction,
+  getSession,
+  getAccountState: findAccountState,
 })
+
+// A rota de perfil também responde para contas pendentes ou banidas: é ela que
+// informa ao app por que o acesso está bloqueado.
+const readSession = createSessionGuard({
+  getSession,
+  getAccountState: findAccountState,
+  requireActive: false,
+})
+
+app.get('/api/me', readSession, async (_req, res) => {
+  const account = await findAccountById(res.locals.userId as string)
+
+  if (!account) {
+    res.status(401).json({ error: 'Sessão expirada. Entre novamente.' })
+    return
+  }
+
+  res.json({ account })
+})
+
+app.use('/api/admin', requireSession, adminRouter)
 
 app.get('/api/items', requireSession, async (_req, res) => {
   res.json({ items: await listShoppingItems() })

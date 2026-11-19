@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { checkMemberAccess, parseEmailList, readMemberEmails } from './access.js'
+import {
+  isAutoApproved,
+  parseEmailList,
+  readAutoApprovedEmails,
+} from './access.js'
 
 describe('parseEmailList', () => {
   it('normaliza, descarta vazios e remove duplicados', () => {
@@ -15,10 +19,10 @@ describe('parseEmailList', () => {
   })
 })
 
-describe('readMemberEmails', () => {
+describe('readAutoApprovedEmails', () => {
   it('usa apenas ALLOWED_EMAILS', () => {
     assert.deepEqual(
-      readMemberEmails({
+      readAutoApprovedEmails({
         ALLOWED_EMAILS: 'casa@exemplo.com',
         SEED_USER_1_EMAIL: 'usuario1@vaidelista.app',
       }),
@@ -26,42 +30,22 @@ describe('readMemberEmails', () => {
     )
   })
 
-  it('não promove contas de seed a membros', () => {
+  it('não aprova contas de seed automaticamente', () => {
     assert.deepEqual(
-      readMemberEmails({ SEED_USER_1_EMAIL: 'usuario1@vaidelista.app' }),
+      readAutoApprovedEmails({ SEED_USER_1_EMAIL: 'usuario1@vaidelista.app' }),
       [],
     )
   })
 })
 
-describe('checkMemberAccess', () => {
-  const members = ['casa@exemplo.com']
+describe('isAutoApproved', () => {
+  const approved = ['casa@exemplo.com']
 
-  it('libera membro listado', () => {
-    assert.deepEqual(
-      checkMemberAccess('Casa@Exemplo.com ', members, { isProduction: true }),
-      { allowed: true, reason: 'allowed' },
-    )
+  it('reconhece o e-mail ignorando caixa e espaços', () => {
+    assert.equal(isAutoApproved(' Casa@Exemplo.com ', approved), true)
   })
 
-  it('bloqueia conta que não está na lista', () => {
-    assert.deepEqual(
-      checkMemberAccess('intruso@exemplo.com', members, { isProduction: true }),
-      { allowed: false, reason: 'not-listed' },
-    )
-  })
-
-  it('em produção falha fechado quando não há allowlist', () => {
-    assert.deepEqual(
-      checkMemberAccess('casa@exemplo.com', [], { isProduction: true }),
-      { allowed: false, reason: 'not-configured' },
-    )
-  })
-
-  it('fora de produção segue liberado sem allowlist', () => {
-    assert.deepEqual(
-      checkMemberAccess('casa@exemplo.com', [], { isProduction: false }),
-      { allowed: true, reason: 'not-configured' },
-    )
+  it('mantém pendente quem não está na lista', () => {
+    assert.equal(isAutoApproved('intruso@exemplo.com', approved), false)
   })
 })
