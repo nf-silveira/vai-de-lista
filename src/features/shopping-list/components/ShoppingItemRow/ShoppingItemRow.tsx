@@ -3,10 +3,7 @@ import type {
   ShoppingItem,
   ShoppingItemPatch,
 } from '../../../../../shared/shopping-list'
-import {
-  formatCurrency,
-  formatQuantity,
-} from '../../utils/summarizeItems'
+import { formatCurrency, formatQuantity } from '../../../../lib/format'
 import { ShoppingItemEditor } from '../ShoppingItemEditor/ShoppingItemEditor'
 import styles from './ShoppingItemRow.module.css'
 

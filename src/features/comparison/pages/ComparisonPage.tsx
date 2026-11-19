@@ -4,7 +4,12 @@ import type {
   ComparisonReference,
 } from '../../../../shared/comparison'
 import { LoadingState } from '../../../components/LoadingState/LoadingState'
-import { formatQuantity } from '../../shopping-list/utils/summarizeItems'
+import {
+  formatDateTime,
+  formatPercentage,
+  formatPrice,
+  formatQuantity,
+} from '../../../lib/format'
 import { useComparison } from '../hooks/useComparison'
 import { useProductSearch } from '../hooks/useProductSearch'
 import styles from './ComparisonPage.module.css'
@@ -13,31 +18,6 @@ const PERIOD_TITLES: Record<ComparisonPeriod, string> = {
   previous: 'Compra anterior',
   last7Days: 'Últimos 7 dias',
   previousMonth: 'Mês anterior',
-}
-
-function formatPrice(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 4,
-  }).format(value)
-}
-
-function formatPercentage(value: number): string {
-  const formatted = new Intl.NumberFormat('pt-BR', {
-    maximumFractionDigits: 1,
-    signDisplay: 'always',
-  }).format(value)
-
-  return `${formatted}%`
-}
-
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value))
 }
 
 function ReferenceCard({ reference }: { reference: ComparisonReference }) {
@@ -65,7 +45,9 @@ function ReferenceCard({ reference }: { reference: ComparisonReference }) {
   return (
     <div className={styles.reference}>
       <p className={styles.referenceTitle}>{title}</p>
-      <p className={styles.referenceDate}>{formatDate(observation.purchasedAt)}</p>
+      <p className={styles.referenceDate}>
+        {formatDateTime(observation.purchasedAt)}
+      </p>
       <p className={styles.referencePrice}>
         {formatQuantity(observation.quantity)} {observation.unit} ×{' '}
         {formatPrice(observation.unitPrice)}/{observation.unit}
@@ -177,7 +159,7 @@ export function ComparisonPage() {
                   </span>
                   <span className={styles.optionMeta}>
                     {product.observationCount} registro(s) · última compra em{' '}
-                    {formatDate(product.lastPurchasedAt)}
+                    {formatDateTime(product.lastPurchasedAt)}
                   </span>
                 </button>
               </li>
@@ -230,7 +212,7 @@ export function ComparisonPage() {
             <p className={styles.currentMeta}>
               {formatQuantity(comparison.current.quantity)}{' '}
               {comparison.current.unit} ·{' '}
-              {formatDate(comparison.current.purchasedAt)}
+              {formatDateTime(comparison.current.purchasedAt)}
             </p>
           </header>
 

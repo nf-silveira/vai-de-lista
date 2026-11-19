@@ -7,6 +7,9 @@ import {
 
 export const MIN_NAME_LENGTH = 2
 export const MAX_NAME_LENGTH = 80
+const QUANTITY_DECIMALS = 3
+const PRICE_DECIMALS = 2
+const SCALE_TOLERANCE = 1e-6
 
 export interface ItemDraft {
   name: string
@@ -48,6 +51,18 @@ function parseDecimal(value: string): number {
   return Number(value.trim().replace(',', '.'))
 }
 
+function fitScale(value: number, decimals: number): number | null {
+  const factor = 10 ** decimals
+  const scaled = value * factor
+  const rounded = Math.round(scaled)
+
+  if (Math.abs(scaled - rounded) > SCALE_TOLERANCE) {
+    return null
+  }
+
+  return rounded / factor
+}
+
 export function parseItemDraft(draft: ItemDraft): ItemDraftResult {
   const name = draft.name.trim()
 
@@ -62,10 +77,19 @@ export function parseItemDraft(draft: ItemDraft): ItemDraftResult {
     }
   }
 
-  const quantity = parseDecimal(draft.quantity)
+  const parsedQuantity = parseDecimal(draft.quantity)
 
-  if (!Number.isFinite(quantity) || quantity <= 0) {
+  if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
     return { ok: false, message: 'A quantidade deve ser maior que zero.' }
+  }
+
+  const quantity = fitScale(parsedQuantity, QUANTITY_DECIMALS)
+
+  if (quantity === null) {
+    return {
+      ok: false,
+      message: `A quantidade deve ter no máximo ${QUANTITY_DECIMALS} casas decimais.`,
+    }
   }
 
   const unit = ITEM_UNITS.find((candidate) => candidate === draft.unit)
@@ -75,10 +99,23 @@ export function parseItemDraft(draft: ItemDraft): ItemDraftResult {
   }
 
   const isPriceEmpty = draft.unitPrice.trim() === ''
-  const unitPrice = isPriceEmpty ? null : parseDecimal(draft.unitPrice)
+  const parsedPrice = isPriceEmpty ? null : parseDecimal(draft.unitPrice)
 
-  if (unitPrice !== null && (!Number.isFinite(unitPrice) || unitPrice < 0)) {
+  if (
+    parsedPrice !== null &&
+    (!Number.isFinite(parsedPrice) || parsedPrice < 0)
+  ) {
     return { ok: false, message: 'O preço não pode ser negativo.' }
+  }
+
+  const unitPrice =
+    parsedPrice === null ? null : fitScale(parsedPrice, PRICE_DECIMALS)
+
+  if (parsedPrice !== null && unitPrice === null) {
+    return {
+      ok: false,
+      message: `O preço deve ter no máximo ${PRICE_DECIMALS} casas decimais.`,
+    }
   }
 
   return { ok: true, value: { name, quantity, unit, unitPrice } }

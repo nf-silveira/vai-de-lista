@@ -37,6 +37,10 @@
   flex-shrink: 0;
 }
 
+.account :global(.btn) {
+  min-height: 44px;
+}
+
 .userName {
   font-size: 13px;
   max-width: 90px;

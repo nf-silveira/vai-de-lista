@@ -81,6 +81,16 @@ describe('API de itens', {
       })
       assert.equal(anonymousWrite.status, 401)
 
+      const malformedJson = await call('/api/items', {
+        method: 'POST',
+        body: '{bad',
+      })
+      assert.equal(
+        malformedJson.status,
+        400,
+        'JSON malformado deve responder 400, não 500',
+      )
+
       await auth.api.signUpEmail({
         body: { email, password, name: username, username },
       })

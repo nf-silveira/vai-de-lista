@@ -20,16 +20,3 @@ export function summarizeItems(items: ShoppingItem[]): ShoppingListSummary {
     { total: 0, checkedCount: 0, itemsWithoutPrice: 0 },
   )
 }
-
-export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value)
-}
-
-export function formatQuantity(quantity: number): string {
-  return new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 3 }).format(
-    quantity,
-  )
-}

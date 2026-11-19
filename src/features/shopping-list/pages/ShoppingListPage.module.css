@@ -34,7 +34,7 @@
 .summaryWarning {
   margin-top: var(--space-xs);
   font-size: 13px;
-  color: #8a5a00;
+  color: var(--color-warning);
   font-weight: 500;
 }
 
