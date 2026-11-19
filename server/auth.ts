@@ -1,6 +1,12 @@
 import { betterAuth } from 'better-auth'
 import { APIError } from 'better-auth/api'
+import { username } from 'better-auth/plugins'
 import { Resend } from 'resend'
+import {
+  isValidUsername,
+  USERNAME_MAX_LENGTH,
+  USERNAME_MIN_LENGTH,
+} from '../shared/username.js'
 import { parseEmailList } from './access.js'
 import { pool } from './db.js'
 import { createPasswordResetEmailSender } from './passwordResetEmail.js'
@@ -60,6 +66,14 @@ export const auth = betterAuth({
       await sendPasswordResetEmail(user.email, url)
     },
   },
+  // O login é feito pelo nick; o e-mail existe para recuperação de senha.
+  plugins: [
+    username({
+      minUsernameLength: USERNAME_MIN_LENGTH,
+      maxUsernameLength: USERNAME_MAX_LENGTH,
+      usernameValidator: isValidUsername,
+    }),
+  ],
   databaseHooks: {
     user: {
       create: {

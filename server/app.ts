@@ -70,7 +70,7 @@ const tooManyResets = 'Muitos pedidos de redefinição. Aguarde alguns minutos.'
 const tooManyWrites = 'Muitas alterações em pouco tempo. Aguarde um instante.'
 
 app.post(
-  ['/api/auth/sign-up/email', '/api/auth/sign-in/email'],
+  ['/api/auth/sign-up/email', '/api/auth/sign-in/email', '/api/auth/sign-in/username'],
   rateLimit(credentialLimiter, tooManyAttempts),
 )
 app.post(
