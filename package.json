@@ -15,7 +15,7 @@
     "db:setup-runtime-role": "tsx --env-file-if-exists=.env.local scripts/setupRuntimeRole.ts",
     "typecheck": "tsc -b",
     "test": "node --import tsx --test \"src/**/*.test.ts\" \"server/**/*.test.ts\"",
-    "test:auth": "node --env-file-if-exists=.env.local --import tsx --test \"server/*.integration.test.ts\"",
+    "test:auth": "node --env-file-if-exists=.env.local --import tsx --test --test-concurrency=1 \"server/*.integration.test.ts\"",
     "verify": "npm run lint && npm run test && npm run build",
     "preview": "vite preview"
   },
