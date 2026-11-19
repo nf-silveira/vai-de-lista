@@ -13,6 +13,13 @@ import {
   validateNewItem,
 } from './itemValidation.js'
 import { createRateLimiter, type RateLimiter } from './rateLimit.js'
+import {
+  deletePurchase,
+  ensureActiveList,
+  finalizePurchase,
+  findPurchase,
+  listPurchases,
+} from './lists.js'
 import { adminRouter } from './admin.js'
 import { findAccountById, findAccountState } from './accounts.js'
 import { createSessionGuard } from './sessionGuard.js'
@@ -112,7 +119,8 @@ app.get('/api/me', readSession, async (_req, res) => {
 app.use('/api/admin', requireSession, adminRouter)
 
 app.get('/api/items', requireSession, async (_req, res) => {
-  res.json({ items: await listShoppingItems() })
+  const list = await ensureActiveList()
+  res.json({ items: await listShoppingItems(list.id), list })
 })
 
 app.post(
@@ -127,7 +135,8 @@ app.post(
       return
     }
 
-    const item = await createShoppingItem(validation.value)
+    const list = await ensureActiveList()
+    const item = await createShoppingItem(list.id, validation.value)
     res.status(201).json({ item })
   },
 )
@@ -151,7 +160,8 @@ app.patch<{ id: string }>(
       return
     }
 
-    const item = await updateShoppingItem(id, validation.value)
+    const list = await ensureActiveList()
+    const item = await updateShoppingItem(list.id, id, validation.value)
 
     if (!item) {
       res.status(404).json({ error: 'Item não encontrado.' })
@@ -174,7 +184,8 @@ app.delete<{ id: string }>(
       return
     }
 
-    const removed = await deleteShoppingItem(id)
+    const list = await ensureActiveList()
+    const removed = await deleteShoppingItem(list.id, id)
 
     if (!removed) {
       res.status(404).json({ error: 'Item não encontrado.' })
@@ -182,6 +193,98 @@ app.delete<{ id: string }>(
     }
 
     res.status(204).end()
+  },
+)
+
+app.get('/api/purchases', requireSession, async (_req, res) => {
+  res.json({ purchases: await listPurchases() })
+})
+
+app.post(
+  '/api/purchases',
+  requireSession,
+  rateLimit(itemWriteLimiter, tooManyWrites),
+  async (req, res) => {
+    const listId = (req.body as { listId?: unknown } | null)?.listId
+
+    if (typeof listId !== 'string' || !isValidItemId(listId)) {
+      res.status(400).json({ error: 'Lista inválida.' })
+      return
+    }
+
+    const result = await finalizePurchase(
+      listId,
+      res.locals.userId as string,
+    )
+
+    if (!result.ok) {
+      if (result.reason === 'empty') {
+        res
+          .status(400)
+          .json({ error: 'Adicione ao menos um item antes de finalizar.' })
+        return
+      }
+
+      res.status(404).json({ error: 'Lista não encontrada.' })
+      return
+    }
+
+    res.status(result.alreadyCompleted ? 200 : 201).json({
+      purchase: result.purchase,
+      alreadyCompleted: result.alreadyCompleted,
+    })
+  },
+)
+
+app.get<{ id: string }>(
+  '/api/purchases/:id',
+  requireSession,
+  async (req, res) => {
+    const { id } = req.params
+
+    if (!isValidItemId(id)) {
+      res.status(400).json({ error: 'Compra inválida.' })
+      return
+    }
+
+    const purchase = await findPurchase(id)
+
+    if (!purchase) {
+      res.status(404).json({ error: 'Compra não encontrada.' })
+      return
+    }
+
+    res.json({ purchase })
+  },
+)
+
+app.delete<{ id: string }>(
+  '/api/purchases/:id',
+  requireSession,
+  rateLimit(itemWriteLimiter, tooManyWrites),
+  async (req, res) => {
+    const { id } = req.params
+
+    if (!isValidItemId(id)) {
+      res.status(400).json({ error: 'Compra inválida.' })
+      return
+    }
+
+    const result = await deletePurchase(id)
+
+    if (result === 'deleted') {
+      res.status(204).end()
+      return
+    }
+
+    if (result === 'active') {
+      res
+        .status(409)
+        .json({ error: 'A lista ativa não pode ser excluída por aqui.' })
+      return
+    }
+
+    res.status(404).json({ error: 'Compra não encontrada.' })
   },
 )
 

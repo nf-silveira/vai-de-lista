@@ -2,6 +2,8 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PlaceholderPage } from '../components/PlaceholderPage/PlaceholderPage'
 import { AdminPage } from '../features/admin/pages/AdminPage'
 import { ForgotPasswordPage } from '../features/auth/pages/ForgotPasswordPage'
+import { HistoryPage } from '../features/history/pages/HistoryPage'
+import { PurchaseDetailPage } from '../features/history/pages/PurchaseDetailPage'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { ResetPasswordPage } from '../features/auth/pages/ResetPasswordPage'
 import { SignUpPage } from '../features/auth/pages/SignUpPage'
@@ -22,15 +24,8 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <ShoppingListPage /> },
           { path: 'admin', element: <AdminPage /> },
-          {
-            path: 'historico',
-            element: (
-              <PlaceholderPage
-                title="Histórico"
-                description="Suas compras finalizadas vão aparecer aqui para consulta e comparação."
-              />
-            ),
-          },
+          { path: 'historico', element: <HistoryPage /> },
+          { path: 'historico/:id', element: <PurchaseDetailPage /> },
           {
             path: 'comparar',
             element: (

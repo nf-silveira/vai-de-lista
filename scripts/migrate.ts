@@ -10,22 +10,99 @@ function preferOwnerConnection(): void {
   }
 }
 
-const SHOPPING_ITEMS_TABLE = `
-  create table if not exists shopping_items (
+const SHOPPING_LISTS_TABLE = `
+  create table if not exists shopping_lists (
     id uuid primary key default gen_random_uuid(),
     name text not null,
-    quantity numeric(10, 3) not null default 1 check (quantity > 0),
+    status text not null default 'active',
+    created_at timestamptz not null default now(),
+    completed_at timestamptz,
+    updated_at timestamptz not null default now(),
+    constraint shopping_lists_status_check
+      check (status in ('active', 'completed')),
+    constraint shopping_lists_completed_check
+      check ((status = 'completed') = (completed_at is not null))
+  )
+`
+
+const SHOPPING_LIST_ITEMS_TABLE = `
+  create table if not exists shopping_list_items (
+    id uuid primary key default gen_random_uuid(),
+    list_id uuid not null references shopping_lists(id) on delete cascade,
+    product_name text not null,
+    quantity numeric(12, 3) not null default 1 check (quantity > 0),
     unit text not null default 'un',
-    unit_price numeric(10, 2) check (unit_price >= 0),
-    is_checked boolean not null default false,
+    unit_price numeric(12, 2) check (unit_price is null or unit_price >= 0),
+    is_collected boolean not null default false,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
   )
 `
 
-const SHOPPING_ITEMS_UNIT_COLUMN = `
-  alter table shopping_items
-    add column if not exists unit text not null default 'un'
+const SHOPPING_LIST_ITEMS_INDEX = `
+  create index if not exists shopping_list_items_list_idx
+    on shopping_list_items(list_id)
+`
+
+const PRICE_RECORDS_TABLE = `
+  create table if not exists price_records (
+    id uuid primary key default gen_random_uuid(),
+    recorded_by text references "user"(id) on delete set null,
+    list_item_id uuid references shopping_list_items(id) on delete set null,
+    product_key text not null,
+    product_name text not null,
+    quantity numeric(12, 3) not null check (quantity > 0),
+    unit text not null,
+    unit_price numeric(12, 2) not null check (unit_price >= 0),
+    normalized_unit text,
+    normalized_unit_price numeric(12, 4),
+    purchased_at timestamptz not null,
+    created_at timestamptz not null default now()
+  )
+`
+
+const PRICE_RECORDS_INDEXES = [
+  `create index if not exists price_records_product_date_idx
+     on price_records(product_key, purchased_at desc)`,
+  // Impede registro duplicado na finalização, mesmo se ela for repetida.
+  `create unique index if not exists price_records_list_item_key
+     on price_records(list_item_id) where list_item_id is not null`,
+]
+
+/**
+ * A lista única antiga (`shopping_items`) vira a primeira lista ativa. A cópia
+ * só acontece uma vez: se já existir item no novo schema, não mexe em nada.
+ */
+const LEGACY_LIST_MIGRATION = `
+  do $$
+  declare
+    active_id uuid;
+  begin
+    select id into active_id
+      from shopping_lists
+     where status = 'active'
+     order by created_at asc
+     limit 1;
+
+    if active_id is null then
+      insert into shopping_lists (name, status)
+      values ('Lista da casa', 'active')
+      returning id into active_id;
+    end if;
+
+    if to_regclass('public.shopping_items') is not null
+       and not exists (select 1 from shopping_list_items) then
+      execute $copy$
+        insert into shopping_list_items
+          (list_id, product_name, quantity, unit, unit_price, is_collected,
+           created_at, updated_at)
+        select $1, name, quantity, unit, unit_price, is_checked,
+               created_at, updated_at
+          from shopping_items
+      $copy$ using active_id;
+    end if;
+  end
+  $$
 `
 
 /** Colunas de papel, aprovação e banimento usadas pelo painel de contas. */
@@ -51,9 +128,17 @@ async function run(): Promise<void> {
     await runMigrations()
     console.log('Tabelas de autenticação do Better Auth aplicadas.')
 
-    await query(SHOPPING_ITEMS_TABLE)
-    await query(SHOPPING_ITEMS_UNIT_COLUMN)
-    console.log('Tabela shopping_items aplicada.')
+    await query(SHOPPING_LISTS_TABLE)
+    await query(SHOPPING_LIST_ITEMS_TABLE)
+    await query(SHOPPING_LIST_ITEMS_INDEX)
+    await query(PRICE_RECORDS_TABLE)
+
+    for (const statement of PRICE_RECORDS_INDEXES) {
+      await query(statement)
+    }
+
+    await query(LEGACY_LIST_MIGRATION)
+    console.log('Listas, itens de compra e registros de preço aplicados.')
 
     for (const statement of USER_ACCOUNT_COLUMNS) {
       await query(statement)

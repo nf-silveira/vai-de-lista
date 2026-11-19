@@ -1,50 +1,32 @@
 import type {
+  ActiveList,
   NewShoppingItem,
+  PurchaseDetail,
   ShoppingItem,
   ShoppingItemPatch,
 } from '../../../../shared/shopping-list'
+import { apiRequest } from '../../../lib/apiRequest'
 
-interface ItemsResponse {
+export interface ShoppingItemsSnapshot {
   items: ShoppingItem[]
+  list: ActiveList
 }
 
 interface ItemResponse {
   item: ShoppingItem
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`/api/items${path}`, {
-    credentials: 'include',
-    headers: init?.body ? { 'Content-Type': 'application/json' } : undefined,
-    ...init,
-  })
-
-  if (response.status === 204) {
-    return undefined as T
-  }
-
-  const payload: unknown = await response.json().catch(() => null)
-
-  if (!response.ok) {
-    const message =
-      payload && typeof payload === 'object' && 'error' in payload
-        ? String(payload.error)
-        : 'Não foi possível concluir a operação.'
-
-    throw new Error(message)
-  }
-
-  return payload as T
+interface PurchaseResponse {
+  purchase: PurchaseDetail
 }
 
 export const shoppingListApi = {
-  async list(): Promise<ShoppingItem[]> {
-    const { items } = await request<ItemsResponse>('')
-    return items
+  list(): Promise<ShoppingItemsSnapshot> {
+    return apiRequest<ShoppingItemsSnapshot>('/api/items')
   },
 
   async create(item: NewShoppingItem): Promise<ShoppingItem> {
-    const { item: created } = await request<ItemResponse>('', {
+    const { item: created } = await apiRequest<ItemResponse>('/api/items', {
       method: 'POST',
       body: JSON.stringify(item),
     })
@@ -52,7 +34,7 @@ export const shoppingListApi = {
   },
 
   async update(id: string, patch: ShoppingItemPatch): Promise<ShoppingItem> {
-    const { item } = await request<ItemResponse>(`/${id}`, {
+    const { item } = await apiRequest<ItemResponse>(`/api/items/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(patch),
     })
@@ -60,6 +42,14 @@ export const shoppingListApi = {
   },
 
   async remove(id: string): Promise<void> {
-    await request<void>(`/${id}`, { method: 'DELETE' })
+    await apiRequest<void>(`/api/items/${id}`, { method: 'DELETE' })
+  },
+
+  async finalize(listId: string): Promise<PurchaseDetail> {
+    const { purchase } = await apiRequest<PurchaseResponse>('/api/purchases', {
+      method: 'POST',
+      body: JSON.stringify({ listId }),
+    })
+    return purchase
   },
 }
