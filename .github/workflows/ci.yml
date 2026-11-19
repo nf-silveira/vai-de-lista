@@ -15,6 +15,25 @@ jobs:
     name: npm run verify
     runs-on: ubuntu-latest
 
+    env:
+      BETTER_AUTH_SECRET: ci-secret-com-pelo-menos-32-caracteres
+      BETTER_AUTH_URL: http://localhost:5174
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vaidelista
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,5 +47,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint, typecheck and build
+      - name: Migrate test database
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vaidelista
+        run: npm run db:migrate
+
+      - name: Lint, unit tests and build
         run: npm run verify
+
+      - name: Integration tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vaidelista
+        run: npm run test:auth

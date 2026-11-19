@@ -15,7 +15,10 @@ export type ValidationResult<T> =
 const NAME_MIN_LENGTH = 2
 const NAME_MAX_LENGTH = 80
 const QUANTITY_MAX = 999_999
+const QUANTITY_DECIMALS = 3
 const PRICE_MAX = 999_999.99
+const PRICE_DECIMALS = 2
+const SCALE_TOLERANCE = 1e-6
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -41,6 +44,22 @@ export function parseItemName(value: unknown): ValidationResult<string> {
   return { ok: true, value: trimmed }
 }
 
+/**
+ * Rejeita valores que não cabem na escala da coluna numérica; sem isso o banco
+ * arredonda (ou estoura) e o usuário recebe um 500 em vez de uma mensagem.
+ */
+function fitScale(value: number, decimals: number): number | null {
+  const factor = 10 ** decimals
+  const scaled = value * factor
+  const rounded = Math.round(scaled)
+
+  if (Math.abs(scaled - rounded) > SCALE_TOLERANCE) {
+    return null
+  }
+
+  return rounded / factor
+}
+
 export function parseItemQuantity(value: unknown): ValidationResult<number> {
   const parsed = value === undefined || value === '' ? 1 : Number(value)
 
@@ -48,14 +67,23 @@ export function parseItemQuantity(value: unknown): ValidationResult<number> {
     return { ok: false, message: 'A quantidade deve ser maior que zero.' }
   }
 
-  if (parsed > QUANTITY_MAX) {
+  const quantity = fitScale(parsed, QUANTITY_DECIMALS)
+
+  if (quantity === null) {
+    return {
+      ok: false,
+      message: `A quantidade deve ter no máximo ${QUANTITY_DECIMALS} casas decimais.`,
+    }
+  }
+
+  if (quantity > QUANTITY_MAX) {
     return {
       ok: false,
       message: `A quantidade deve ser de no máximo ${QUANTITY_MAX}.`,
     }
   }
 
-  return { ok: true, value: parsed }
+  return { ok: true, value: quantity }
 }
 
 export function parseItemUnit(value: unknown): ValidationResult<ItemUnit> {
@@ -86,14 +114,23 @@ export function parseItemPrice(
     return { ok: false, message: 'O preço unitário não pode ser negativo.' }
   }
 
-  if (parsed > PRICE_MAX) {
+  const price = fitScale(parsed, PRICE_DECIMALS)
+
+  if (price === null) {
+    return {
+      ok: false,
+      message: `O preço unitário deve ter no máximo ${PRICE_DECIMALS} casas decimais.`,
+    }
+  }
+
+  if (price > PRICE_MAX) {
     return {
       ok: false,
       message: `O preço unitário deve ser de no máximo ${PRICE_MAX}.`,
     }
   }
 
-  return { ok: true, value: parsed }
+  return { ok: true, value: price }
 }
 
 export function validateNewItem(

@@ -4,11 +4,11 @@ import { LoadingState } from '../../../components/LoadingState/LoadingState'
 import { describeApiError } from '../../../lib/apiError'
 import {
   formatCurrency,
+  formatDateTime,
   formatQuantity,
-} from '../../shopping-list/utils/summarizeItems'
+} from '../../../lib/format'
 import { usePurchase } from '../hooks/usePurchase'
 import { historyApi } from '../services/historyApi'
-import { formatPurchaseDate } from '../utils/formatPurchaseDate'
 import styles from './PurchaseDetailPage.module.css'
 
 export function PurchaseDetailPage() {
@@ -71,7 +71,7 @@ export function PurchaseDetailPage() {
       <header className={styles.header}>
         <h2 className={styles.title}>{purchase.name}</h2>
         <p className={styles.date}>
-          {formatPurchaseDate(purchase.purchasedAt)}
+          {formatDateTime(purchase.purchasedAt)}
         </p>
       </header>
 

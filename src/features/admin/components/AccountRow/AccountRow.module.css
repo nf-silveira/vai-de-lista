@@ -41,3 +41,24 @@
   flex-wrap: wrap;
   gap: var(--space-xs);
 }
+
+.confirmBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+  width: 100%;
+  padding-top: var(--space-xs);
+  border-top: 1px dashed var(--color-border);
+}
+
+.confirmText {
+  flex-grow: 1;
+  font-size: 13px;
+  color: var(--color-text-strong);
+}
+
+.confirmBar button {
+  min-height: 44px;
+}

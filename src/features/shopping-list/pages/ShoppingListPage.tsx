@@ -4,7 +4,8 @@ import { FinalizePurchaseCard } from '../components/FinalizePurchaseCard/Finaliz
 import { ShoppingItemForm } from '../components/ShoppingItemForm/ShoppingItemForm'
 import { ShoppingItemRow } from '../components/ShoppingItemRow/ShoppingItemRow'
 import { useShoppingItems } from '../hooks/useShoppingItems'
-import { formatCurrency, summarizeItems } from '../utils/summarizeItems'
+import { formatCurrency } from '../../../lib/format'
+import { summarizeItems } from '../utils/summarizeItems'
 import styles from './ShoppingListPage.module.css'
 
 export function ShoppingListPage() {
@@ -52,7 +53,7 @@ export function ShoppingListPage() {
 
   return (
     <section className={styles.page}>
-      <div className={`card ${styles.summary}`}>
+      <div className={`card ${styles.summary}`} aria-live="polite">
         <div className="card-body">
           <p className={styles.summaryLabel}>Total parcial</p>
           <p className={styles.summaryValue}>{formatCurrency(summary.total)}</p>

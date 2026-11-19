@@ -45,6 +45,8 @@
 }
 
 .actionButton {
+  min-height: 44px;
+  min-width: 44px;
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
@@ -67,8 +69,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
@@ -103,4 +105,8 @@
   flex-grow: 1;
   font-size: 13px;
   color: var(--color-text-strong);
+}
+
+.confirmBar button {
+  min-height: 44px;
 }

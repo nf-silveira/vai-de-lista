@@ -26,20 +26,6 @@ export function AdminPage() {
     return <LoadingState message="Carregando contas..." />
   }
 
-  async function handleRemove(userId: string, displayName: string) {
-    const confirmed = window.confirm(
-      `Excluir a conta ${displayName}? Essa ação não pode ser desfeita.`,
-    )
-
-    if (!confirmed) return
-
-    const target = users.find((user) => user.id === userId)
-
-    if (target) {
-      await remove(target)
-    }
-  }
-
   return (
     <section className={styles.page}>
       <header className={styles.header}>
@@ -69,9 +55,7 @@ export function AdminPage() {
               onApprove={approve}
               onBan={ban}
               onUnban={unban}
-              onRemove={(account) =>
-                void handleRemove(account.id, account.username ?? account.name)
-              }
+              onRemove={(account) => void remove(account)}
             />
           ))}
         </ul>

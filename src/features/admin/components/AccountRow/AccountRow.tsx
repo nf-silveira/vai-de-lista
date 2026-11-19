@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { AccountSummary } from '../../../../../shared/account'
 import {
   ACCOUNT_STATUS_BADGES,
@@ -24,7 +25,13 @@ export function AccountRow({
   onUnban,
   onRemove,
 }: AccountRowProps) {
+  const [isConfirmingRemove, setIsConfirmingRemove] = useState(false)
   const displayName = account.username ?? account.name
+
+  function handleConfirmRemove() {
+    setIsConfirmingRemove(false)
+    onRemove(account)
+  }
 
   return (
     <li className={`list-group-item ${styles.row}`}>
@@ -44,7 +51,33 @@ export function AccountRow({
         </div>
       </div>
 
-      {!isSelf && (
+      {!isSelf && isConfirmingRemove && (
+        <div
+          className={styles.confirmBar}
+          role="group"
+          aria-label={`Confirmar exclusão de ${displayName}`}
+        >
+          <span className={styles.confirmText}>Excluir conta?</span>
+          <button
+            type="button"
+            className="btn btn-sm btn-danger"
+            onClick={handleConfirmRemove}
+            disabled={isBusy}
+          >
+            Excluir
+          </button>
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-secondary"
+            onClick={() => setIsConfirmingRemove(false)}
+            disabled={isBusy}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+
+      {!isSelf && !isConfirmingRemove && (
         <div className={styles.actions}>
           {account.status === 'pending' && (
             <button
@@ -82,7 +115,7 @@ export function AccountRow({
           <button
             type="button"
             className="btn btn-sm btn-outline-danger"
-            onClick={() => onRemove(account)}
+            onClick={() => setIsConfirmingRemove(true)}
             disabled={isBusy}
           >
             Excluir

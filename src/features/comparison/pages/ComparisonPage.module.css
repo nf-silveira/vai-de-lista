@@ -140,7 +140,7 @@
 .referenceWarning {
   font-size: 13px;
   font-weight: 500;
-  color: #8a5a00;
+  color: var(--color-warning);
 }
 
 .variation {

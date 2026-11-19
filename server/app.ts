@@ -317,21 +317,25 @@ app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Recurso não encontrado.' })
 })
 
-interface BodyTooLargeError {
-  type: 'entity.too.large'
+interface BodyParserError {
+  type: 'entity.too.large' | 'entity.parse.failed'
 }
 
 function describeError(error: unknown): string {
   return error instanceof Error ? `${error.name}: ${error.message}` : String(error)
 }
 
-function isBodyTooLarge(error: unknown): error is BodyTooLargeError {
-  return (
+function bodyParserErrorType(error: unknown): BodyParserError['type'] | null {
+  if (
     typeof error === 'object' &&
     error !== null &&
     'type' in error &&
-    error.type === 'entity.too.large'
-  )
+    (error.type === 'entity.too.large' || error.type === 'entity.parse.failed')
+  ) {
+    return error.type
+  }
+
+  return null
 }
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
@@ -340,8 +344,15 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
     return
   }
 
-  if (isBodyTooLarge(error)) {
+  const parserError = bodyParserErrorType(error)
+
+  if (parserError === 'entity.too.large') {
     res.status(413).json({ error: 'Requisição muito grande.' })
+    return
+  }
+
+  if (parserError === 'entity.parse.failed') {
+    res.status(400).json({ error: 'JSON inválido.' })
     return
   }
 
