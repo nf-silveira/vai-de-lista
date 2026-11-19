@@ -14,6 +14,7 @@
     "db:setup-runtime-role": "tsx --env-file=.env.local scripts/setupRuntimeRole.ts",
     "typecheck": "tsc -b",
     "test": "node --import tsx --test \"src/**/*.test.ts\" \"server/**/*.test.ts\"",
+    "test:auth": "node --env-file=.env.local --import tsx --test \"server/authFlow.integration.test.ts\"",
     "verify": "npm run lint && npm run test && npm run build",
     "preview": "vite preview"
   },
@@ -24,7 +25,8 @@
     "pg": "^8.23.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-router-dom": "^7.18.5"
+    "react-router-dom": "^7.18.5",
+    "resend": "^6.39.0"
   },
   "devDependencies": {
     "@better-auth/cli": "^1.4.22",
