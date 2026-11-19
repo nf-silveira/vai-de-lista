@@ -35,7 +35,10 @@ describe('API de itens', {
     const userIdLookup = 'select id from "user" where email = $1'
 
     async function cleanup(): Promise<void> {
-      await pool.query('delete from shopping_items where name = $1', [itemName])
+      await pool.query(
+        'delete from shopping_list_items where product_name = $1',
+        [itemName],
+      )
       await pool.query(
         `delete from session where "userId" in (${userIdLookup})`,
         [email],

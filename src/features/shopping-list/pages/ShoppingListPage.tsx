@@ -1,4 +1,6 @@
+import { useNavigate } from 'react-router-dom'
 import { LoadingState } from '../../../components/LoadingState/LoadingState'
+import { FinalizePurchaseCard } from '../components/FinalizePurchaseCard/FinalizePurchaseCard'
 import { ShoppingItemForm } from '../components/ShoppingItemForm/ShoppingItemForm'
 import { ShoppingItemRow } from '../components/ShoppingItemRow/ShoppingItemRow'
 import { useShoppingItems } from '../hooks/useShoppingItems'
@@ -6,17 +8,20 @@ import { formatCurrency, summarizeItems } from '../utils/summarizeItems'
 import styles from './ShoppingListPage.module.css'
 
 export function ShoppingListPage() {
+  const navigate = useNavigate()
   const {
     items,
     status,
     errorMessage,
     isAdding,
+    isFinishing,
     busyItemId,
     reload,
     addItem,
     updateItem,
     toggleItem,
     removeItem,
+    finalize,
   } = useShoppingItems()
 
   if (status === 'loading') {
@@ -98,6 +103,22 @@ export function ShoppingListPage() {
           </ul>
         )}
       </div>
+
+      {items.length > 0 && (
+        <FinalizePurchaseCard
+          itemCount={items.length}
+          total={summary.total}
+          itemsWithoutPrice={summary.itemsWithoutPrice}
+          isFinishing={isFinishing}
+          onConfirm={async () => {
+            const purchase = await finalize()
+
+            if (purchase) {
+              navigate(`/historico/${purchase.id}`)
+            }
+          }}
+        />
+      )}
     </section>
   )
 }
