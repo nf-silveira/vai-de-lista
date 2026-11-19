@@ -33,6 +33,11 @@ export function normalizeProductKey(name: string): string {
     .replace(/\s+/g, ' ')
 }
 
+/** Fator que converte a unidade para a base usada na comparação. */
+export function normalizeFactor(unit: ItemUnit): number | null {
+  return BASE_UNITS[unit]?.factor ?? null
+}
+
 export function normalizePrice(
   unit: ItemUnit,
   unitPrice: number | null,

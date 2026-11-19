@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PlaceholderPage } from '../components/PlaceholderPage/PlaceholderPage'
 import { AdminPage } from '../features/admin/pages/AdminPage'
 import { ForgotPasswordPage } from '../features/auth/pages/ForgotPasswordPage'
+import { ComparisonPage } from '../features/comparison/pages/ComparisonPage'
 import { HistoryPage } from '../features/history/pages/HistoryPage'
 import { PurchaseDetailPage } from '../features/history/pages/PurchaseDetailPage'
 import { LoginPage } from '../features/auth/pages/LoginPage'
@@ -26,15 +27,7 @@ export const router = createBrowserRouter([
           { path: 'admin', element: <AdminPage /> },
           { path: 'historico', element: <HistoryPage /> },
           { path: 'historico/:id', element: <PurchaseDetailPage /> },
-          {
-            path: 'comparar',
-            element: (
-              <PlaceholderPage
-                title="Comparar preços"
-                description="Em breve você poderá ver se o preço subiu ou caiu desde a última compra."
-              />
-            ),
-          },
+          { path: 'comparar', element: <ComparisonPage /> },
           {
             path: 'configuracoes',
             element: (

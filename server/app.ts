@@ -22,6 +22,7 @@ import {
 } from './lists.js'
 import { adminRouter } from './admin.js'
 import { findAccountById, findAccountState } from './accounts.js'
+import { getComparison, listProducts } from './comparisonQueries.js'
 import { createSessionGuard } from './sessionGuard.js'
 
 export const app = express()
@@ -287,6 +288,30 @@ app.delete<{ id: string }>(
     res.status(404).json({ error: 'Compra não encontrada.' })
   },
 )
+
+app.get('/api/products', requireSession, async (req, res) => {
+  const search = typeof req.query.search === 'string' ? req.query.search : ''
+  res.json({ products: await listProducts(search) })
+})
+
+app.get('/api/comparisons', requireSession, async (req, res) => {
+  const productKey =
+    typeof req.query.productKey === 'string' ? req.query.productKey : ''
+
+  if (!productKey.trim()) {
+    res.status(400).json({ error: 'Informe o produto para comparar.' })
+    return
+  }
+
+  const comparison = await getComparison(productKey.trim())
+
+  if (!comparison) {
+    res.status(404).json({ error: 'Produto sem registros de preço.' })
+    return
+  }
+
+  res.json({ comparison })
+})
 
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Recurso não encontrado.' })

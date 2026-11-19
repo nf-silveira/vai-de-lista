@@ -2,6 +2,10 @@ import assert from 'node:assert/strict'
 import type { AddressInfo } from 'node:net'
 import { describe, it } from 'node:test'
 import type {
+  ProductComparison,
+  ProductOption,
+} from '../shared/comparison.js'
+import type {
   PurchaseDetail,
   PurchaseSummary,
 } from '../shared/shopping-list.js'
@@ -157,6 +161,33 @@ describe('finalização e histórico', {
       )
       assert.equal(registered?.unitPrice, 12.5)
       assert.equal(registered?.quantity, 2)
+
+      const productKey = productName.toLowerCase()
+      const productsResponse = await call(
+        `/api/products?search=${encodeURIComponent('Produto teste')}`,
+      )
+      assert.equal(productsResponse.status, 200)
+      const { products } = (await productsResponse.json()) as {
+        products: ProductOption[]
+      }
+      assert.ok(
+        products.some((product) => product.productKey === productKey),
+        'o produto finalizado deve aparecer na busca',
+      )
+
+      const comparisonResponse = await call(
+        `/api/comparisons?productKey=${encodeURIComponent(productKey)}`,
+      )
+      assert.equal(comparisonResponse.status, 200)
+      const { comparison } = (await comparisonResponse.json()) as {
+        comparison: ProductComparison
+      }
+      assert.equal(comparison.current.unitPrice, 12.5)
+      assert.equal(comparison.references.length, 3)
+      assert.ok(
+        comparison.references.every((reference) => reference.observation === null),
+        'com uma única compra não deve haver referência comparável',
+      )
 
       const removed = await call(`/api/purchases/${first.purchase.id}`, {
         method: 'DELETE',
