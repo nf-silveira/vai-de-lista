@@ -37,13 +37,21 @@ async function run(): Promise<void> {
       throw new Error(`Nenhuma conta cadastrada com o e-mail ${email}.`)
     }
 
+    const passwordHash = await hashPassword(password)
+
     const updated = await client.query(
       'update account set password = $1, "updatedAt" = now() where "userId" = $2 and "providerId" = $3',
-      [await hashPassword(password), userId, 'credential'],
+      [passwordHash, userId, 'credential'],
     )
 
+    // Contas inseridas manualmente no banco não têm a linha de credencial que o
+    // better-auth usa para validar a senha; criamos a linha no mesmo formato dele.
     if (updated.rowCount === 0) {
-      throw new Error('A conta não tem credencial de e-mail/senha para redefinir.')
+      await client.query(
+        `insert into account (id, "accountId", "providerId", "userId", password, "createdAt", "updatedAt")
+         values (gen_random_uuid()::text, $1, $2, $1, $3, now(), now())`,
+        [userId, 'credential', passwordHash],
+      )
     }
 
     await client.query('delete from session where "userId" = $1', [userId])
