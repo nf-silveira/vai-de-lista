@@ -62,7 +62,7 @@ export function SignUpPage() {
   return (
     <AuthShell
       title="Criar conta"
-      hint="A conta dá acesso à mesma lista compartilhada da casa."
+      hint="O cadastro precisa ser aprovado pelo administrador antes de acessar a lista."
       onSubmit={handleSubmit}
       error={error}
       footer={

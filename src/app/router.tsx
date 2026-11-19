@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PlaceholderPage } from '../components/PlaceholderPage/PlaceholderPage'
+import { AdminPage } from '../features/admin/pages/AdminPage'
 import { ForgotPasswordPage } from '../features/auth/pages/ForgotPasswordPage'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { ResetPasswordPage } from '../features/auth/pages/ResetPasswordPage'
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { index: true, element: <ShoppingListPage /> },
+          { path: 'admin', element: <AdminPage /> },
           {
             path: 'historico',
             element: (

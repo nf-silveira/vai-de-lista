@@ -47,6 +47,16 @@ describe('fluxo de login e redefinição de senha', {
         },
       })
 
+      const { rows: accountRows } = await pool.query<{ status: string }>(
+        'select status from "user" where email = $1',
+        [email],
+      )
+      assert.equal(
+        accountRows[0]?.status,
+        'pending',
+        'o cadastro deve nascer pendente de aprovação',
+      )
+
       const session = await auth.api.signInUsername({
         body: { username, password: initialPassword },
       })
