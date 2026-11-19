@@ -42,6 +42,10 @@
   gap: var(--space-xs);
 }
 
+.actions :global(.btn) {
+  min-height: 44px;
+}
+
 .confirmBar {
   display: flex;
   flex-wrap: wrap;

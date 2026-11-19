@@ -7,7 +7,7 @@ Aplicativo mobile-first para registrar a compra do mercado: adicionar produtos, 
 ## Stack
 
 - **React 19 + TypeScript + Vite**
-- **Bootstrap 5** (grid, formulários e componentes) + **CSS Modules** e design tokens
+- **Bootstrap 5** importado de forma seletiva (formulários, botões, cards, lista, alertas) + **CSS Modules** e design tokens
 - **React Router 7** (rotas com guarda de sessão)
 - **Better Auth** (nick + senha, e-mail para recuperação, sessão em cookie) sobre **Neon PostgreSQL** (`pg`)
 - **Express** para a API, executada no dev server do Vite e como função da Vercel em produção
@@ -32,7 +32,7 @@ server/
 ├── itemValidation.ts     # validação dos payloads de item
 └── rateLimit.ts          # limite de requisições por IP
 scripts/
-├── migrate.ts            # tabelas do Better Auth (via getMigrations) + shopping_items
+├── migrate.ts            # tabelas do Better Auth, listas, itens e preços
 └── seed.ts               # cria as contas permitidas
 shared/shopping-list.ts   # tipos compartilhados entre API e app
 src/

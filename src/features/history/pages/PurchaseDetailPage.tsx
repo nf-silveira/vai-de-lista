@@ -148,7 +148,7 @@ export function PurchaseDetailPage() {
         ) : (
           <button
             type="button"
-            className="btn btn-outline-danger btn-sm"
+            className="btn btn-outline-danger"
             onClick={() => setIsConfirmingDelete(true)}
           >
             Excluir compra
