@@ -55,6 +55,12 @@ jobs:
       - name: Lint, unit tests and build
         run: npm run verify
 
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Mobile layout tests
+        run: npm run test:layout
+
       - name: Integration tests
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vaidelista

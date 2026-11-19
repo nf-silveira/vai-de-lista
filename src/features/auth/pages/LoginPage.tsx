@@ -7,7 +7,7 @@ import { describeSignInError } from '../utils/describeAuthError'
 export function LoginPage() {
   const { data: session, isPending } = useSession()
   const navigate = useNavigate()
-  const [username, setUsername] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -21,10 +21,11 @@ export function LoginPage() {
     setError(null)
     setIsSubmitting(true)
 
-    const { error: signInError } = await signIn.username({
-      username: username.trim(),
-      password,
-    })
+    // O `@` distingue e-mail de nick; nicks só aceitam letras, números, ponto e _.
+    const normalized = identifier.trim().toLowerCase()
+    const { error: signInError } = normalized.includes('@')
+      ? await signIn.email({ email: normalized, password })
+      : await signIn.username({ username: normalized, password })
 
     setIsSubmitting(false)
 
@@ -49,17 +50,19 @@ export function LoginPage() {
       }
     >
       <div>
-        <label className="form-label" htmlFor="username">
-          Nick
+        <label className="form-label" htmlFor="identifier">
+          Nick ou e-mail
         </label>
         <input
-          id="username"
+          id="identifier"
           type="text"
           className="form-control"
           autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
           required
-          value={username}
-          onChange={(event) => setUsername(event.target.value)}
+          value={identifier}
+          onChange={(event) => setIdentifier(event.target.value)}
         />
       </div>
 
