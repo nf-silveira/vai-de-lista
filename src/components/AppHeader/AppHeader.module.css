@@ -38,6 +38,7 @@
 }
 
 .account :global(.btn) {
+  min-width: 44px;
   min-height: 44px;
 }
 
