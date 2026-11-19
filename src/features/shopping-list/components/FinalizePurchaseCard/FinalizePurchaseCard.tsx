@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { formatCurrency } from '../../utils/summarizeItems'
+import { formatCurrency } from '../../../../lib/format'
 import styles from './FinalizePurchaseCard.module.css'
 
 interface FinalizePurchaseCardProps {

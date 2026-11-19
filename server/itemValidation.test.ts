@@ -58,6 +58,40 @@ describe('validateNewItem', () => {
 
     assert.deepEqual(result, { ok: false, message: 'Unidade inválida.' })
   })
+
+  it('rejeita quantidade com mais de 3 casas decimais', () => {
+    const result = validateNewItem({ name: 'Arroz', quantity: 0.0001 })
+
+    assert.deepEqual(result, {
+      ok: false,
+      message: 'A quantidade deve ter no máximo 3 casas decimais.',
+    })
+  })
+
+  it('aceita quantidade com até 3 casas decimais', () => {
+    const result = validateNewItem({ name: 'Arroz', quantity: '1.234' })
+
+    assert.deepEqual(result, {
+      ok: true,
+      value: { name: 'Arroz', quantity: 1.234, unit: 'un', unitPrice: null },
+    })
+  })
+
+  it('rejeita preço com mais de 2 casas decimais', () => {
+    const result = validateNewItem({ name: 'Arroz', unitPrice: 10.999 })
+
+    assert.deepEqual(result, {
+      ok: false,
+      message: 'O preço unitário deve ter no máximo 2 casas decimais.',
+    })
+  })
+
+  it('aceita preço com 2 casas decimais', () => {
+    const result = validateNewItem({ name: 'Arroz', unitPrice: '12.99' })
+
+    assert.equal(result.ok, true)
+    assert.equal(result.ok && result.value.unitPrice, 12.99)
+  })
 })
 
 describe('validateItemPatch', () => {

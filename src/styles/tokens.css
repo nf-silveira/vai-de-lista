@@ -19,6 +19,7 @@
   --color-danger: #c94b45;
   --color-danger-soft: rgba(201, 75, 69, 0.1);
   --color-highlight: #f5d98a;
+  --color-warning: #8a5a00;
 
   /* Tipografia */
   --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -61,5 +62,6 @@
     --color-danger: #e8847e;
     --color-danger-soft: rgba(232, 132, 126, 0.14);
     --color-highlight: #c9a94a;
+  --color-warning: #f0c46a;
   }
 }

@@ -137,7 +137,7 @@ O comando grava o hash do Better Auth, encerra as sessões abertas daquela conta
 
 ## API
 
-Todas as rotas de itens e do histórico exigem sessão de conta **ativa**.
+Todas as rotas de itens e do histórico exigem sessão de conta **ativa**. Não há RLS no Postgres: a API é a fronteira de segurança, valida a sessão e o status da conta antes de qualquer query, e o cliente nunca acessa o banco. Quantidade aceita até 3 casas decimais (máximo `999999`) e preço até 2 casas (máximo `999999.99`) — fora disso a resposta é `400`, nunca um erro de banco.
 
 Finalizar uma compra marca a lista como concluída em transação e grava um registro em `price_records` por item com preço. Repetir a finalização com o mesmo `listId` devolve a mesma compra, sem duplicar preços; itens sem preço continuam no histórico, mas não geram registro. Excluir uma compra remove o retrato e mantém os `price_records` (o vínculo vira nulo).
 
@@ -170,3 +170,4 @@ A SPA e a função `api/[...all].ts` sobem juntas na Vercel. Configure `DATABASE
 ## Git
 
 - Desenvolvimento em `develop`; `main` só recebe via Pull Request com `npm run verify` verde.
+- O CI sobe um Postgres 17 de serviço, roda `npm run db:migrate` e depois executa `npm run test:auth`, então os testes de integração (login, CRUD, finalização e comparação) também são gate de regressão.

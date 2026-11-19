@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom'
 import { LoadingState } from '../../../components/LoadingState/LoadingState'
-import { formatCurrency } from '../../shopping-list/utils/summarizeItems'
+import { formatCurrency, formatDateTime } from '../../../lib/format'
 import { usePurchases } from '../hooks/usePurchases'
-import { formatPurchaseDate } from '../utils/formatPurchaseDate'
 import styles from './HistoryPage.module.css'
 
 export function HistoryPage() {
@@ -50,10 +49,10 @@ export function HistoryPage() {
               <Link
                 to={`/historico/${purchase.id}`}
                 className={styles.card}
-                aria-label={`Ver compra de ${formatPurchaseDate(purchase.purchasedAt)}`}
+                aria-label={`Ver compra de ${formatDateTime(purchase.purchasedAt)}`}
               >
                 <span className={styles.date}>
-                  {formatPurchaseDate(purchase.purchasedAt)}
+                  {formatDateTime(purchase.purchasedAt)}
                 </span>
                 <span className={styles.name}>{purchase.name}</span>
                 <span className={styles.meta}>

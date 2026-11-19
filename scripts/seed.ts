@@ -56,7 +56,14 @@ async function run(): Promise<void> {
       },
     })
 
-    console.log(`Conta criada: ${user.email}`)
+    // O seed cria contas de confiança; sem isso elas nascem pendentes e não
+    // acessam a lista até alguém aprovar no painel.
+    await query(
+      'update "user" set status = $1, "updatedAt" = now() where email = $2',
+      ['active', user.email.toLowerCase()],
+    )
+
+    console.log(`Conta criada e aprovada: ${user.email}`)
   }
 }
 

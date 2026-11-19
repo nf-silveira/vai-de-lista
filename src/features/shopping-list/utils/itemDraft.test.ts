@@ -62,6 +62,31 @@ describe('parseItemDraft', () => {
     assert.equal(parseItemDraft({ ...baseDraft, quantity: 'abc' }).ok, false)
   })
 
+  it('rejeita quantidade com mais de 3 casas decimais', () => {
+    const result = parseItemDraft({ ...baseDraft, quantity: '0,0001' })
+
+    assert.deepEqual(result, {
+      ok: false,
+      message: 'A quantidade deve ter no máximo 3 casas decimais.',
+    })
+  })
+
+  it('aceita quantidade com 3 casas decimais', () => {
+    const result = parseItemDraft({ ...baseDraft, quantity: '1,234' })
+
+    assert.equal(result.ok, true)
+    assert.equal(result.ok && result.value.quantity, 1.234)
+  })
+
+  it('rejeita preço com mais de 2 casas decimais', () => {
+    const result = parseItemDraft({ ...baseDraft, unitPrice: '10,999' })
+
+    assert.deepEqual(result, {
+      ok: false,
+      message: 'O preço deve ter no máximo 2 casas decimais.',
+    })
+  })
+
   it('rejeita preço negativo', () => {
     const result = parseItemDraft({ ...baseDraft, unitPrice: '-1' })
 
