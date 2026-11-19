@@ -36,10 +36,12 @@ app.use((_req, res, next) => {
   next()
 })
 
+/**
+ * Com `trust proxy` configurado, `req.ip` é o IP que o proxy da Vercel registra.
+ * Ler `X-Forwarded-For` direto permitiria ao cliente forjar o IP e burlar o limite.
+ */
 function clientIp(req: Request): string {
-  const forwarded = req.headers['x-forwarded-for']
-  const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded
-  return raw?.split(',')[0]?.trim() || req.ip || 'desconhecido'
+  return req.ip || 'desconhecido'
 }
 
 function rateLimit(limiter: RateLimiter, message: string) {
@@ -57,15 +59,23 @@ function rateLimit(limiter: RateLimiter, message: string) {
 }
 
 const credentialLimiter = createRateLimiter({ windowMs: 5 * 60_000, max: 5 })
+// Balde separado: tentativas de login erradas não podem bloquear a recuperação
+// de senha, que é justamente o que o usuário precisa depois de errar a senha.
+const resetLimiter = createRateLimiter({ windowMs: 15 * 60_000, max: 5 })
 const authLimiter = createRateLimiter({ windowMs: 60_000, max: 100 })
 const itemWriteLimiter = createRateLimiter({ windowMs: 60_000, max: 60 })
 
 const tooManyAttempts = 'Muitas tentativas. Aguarde alguns minutos.'
+const tooManyResets = 'Muitos pedidos de redefinição. Aguarde alguns minutos.'
 const tooManyWrites = 'Muitas alterações em pouco tempo. Aguarde um instante.'
 
 app.post(
   ['/api/auth/sign-up/email', '/api/auth/sign-in/email'],
   rateLimit(credentialLimiter, tooManyAttempts),
+)
+app.post(
+  '/api/auth/request-password-reset',
+  rateLimit(resetLimiter, tooManyResets),
 )
 app.use('/api/auth', rateLimit(authLimiter, tooManyAttempts))
 app.all('/api/auth/*splat', toNodeHandler(auth))

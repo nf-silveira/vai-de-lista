@@ -78,6 +78,10 @@ export function LoginPage() {
       <button type="submit" className="btn btn-primary w-100" disabled={isSubmitting}>
         {isSubmitting ? 'Entrando...' : 'Entrar'}
       </button>
+
+      <Link to="/esqueci-senha" className="text-center">
+        Esqueci minha senha
+      </Link>
     </AuthShell>
   )
 }

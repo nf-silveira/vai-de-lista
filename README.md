@@ -50,6 +50,8 @@ src/
 | `BETTER_AUTH_URL`                                | URL do app (ex.: `http://localhost:5174`)        |
 | `ALLOWED_EMAILS`                                 | e-mails que acessam a lista (obrigatória em produção) |
 | `ALLOW_PUBLIC_SIGNUP`                            | `true` libera o cadastro para qualquer e-mail    |
+| `RESEND_API_KEY`                                 | chave do Resend usada no e-mail de redefinição   |
+| `RESET_EMAIL_FROM`                               | remetente verificado no Resend (obrigatório em produção) |
 | `SEED_USER_1_EMAIL` / `SEED_USER_1_PASSWORD`     | credenciais da primeira conta permitida          |
 | `SEED_USER_2_EMAIL` / `SEED_USER_2_PASSWORD`     | credenciais da segunda conta permitida           |
 
@@ -92,6 +94,7 @@ Repita o passo 2 para o ambiente `preview`. A senha do owner (`MIGRATION_DATABAS
 | `npm run lint`      | ESLint em todo o projeto                              |
 | `npm run typecheck` | Somente a checagem de tipos                           |
 | `npm run test`      | Testes de totalização e validação (`node:test`)       |
+| `npm run test:auth` | Teste de integração de login e redefinição (usa `DATABASE_URL`) |
 | `npm run verify`    | Lint + testes + build (usado antes do commit e no CI) |
 | `npm run db:migrate`| Cria/atualiza tabelas do auth e `shopping_items`      |
 | `npm run db:seed`   | Cria as duas contas permitidas                        |
@@ -105,13 +108,16 @@ Repita o passo 2 para o ambiente `preview`. A senha do owner (`MIGRATION_DATABAS
 - Com `ALLOW_PUBLIC_SIGNUP=true` qualquer e-mail pode se cadastrar; sem ele, só os e-mails de `ALLOWED_EMAILS` e das contas de seed passam (os demais recebem `403`).
 - Em produção (`NODE_ENV=production`) o cadastro público só funciona com `ALLOW_PUBLIC_SIGNUP=true` explícito.
 - Sessão em cookie gerenciada pelo Better Auth; rotas do app passam por `ProtectedRoute`.
-- Não há recuperação de senha por e-mail. Se a senha de um membro se perder, redefina pela máquina de confiança:
+- O app autentica pelas tabelas do Better Auth no schema `public` (`public.user`, `public.account`). O schema `neon_auth`, quando existir no banco, pertence ao Neon Auth e **não** é lido por este código: contas criadas lá não entram no app e a redefinição de senha do app não as alcança.
+- Recuperação de senha em `/esqueci-senha`: o Better Auth gera um link válido por 1 hora e o app o envia via Resend. Configure `RESEND_API_KEY` e `RESET_EMAIL_FROM` com um domínio verificado no Resend — o remetente de teste `onboarding@resend.dev` só entrega para o dono da conta Resend, por isso não é usado em produção.
+- Sem `RESEND_API_KEY`, fora de produção nenhum e-mail sai: o link aparece no terminal do `npm run dev` (`[auth] RESEND_API_KEY ausente...`) e pode ser aberto dali.
+- Se a senha de um membro se perder, também é possível redefinir pela máquina de confiança:
 
 ```bash
 RESET_USER_EMAIL=alguem@exemplo.com RESET_USER_PASSWORD='nova-senha-com-8+' npm run db:reset-password
 ```
 
-O comando grava o hash do Better Auth, encerra as sessões abertas daquela conta e avisa quando o e-mail não existe ou a conta não tem credencial de senha.
+O comando grava o hash do Better Auth, encerra as sessões abertas daquela conta, cria a credencial se a conta não tiver uma e avisa quando o e-mail não existe.
 
 ## API
 
@@ -127,7 +133,7 @@ Todas as rotas de itens exigem sessão ativa.
 
 ## Deploy
 
-A SPA e a função `api/[...all].ts` sobem juntas na Vercel. Configure `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (domínio de produção) e os `SEED_USER_*` nas variáveis de ambiente do projeto; depois rode `npm run db:migrate` apontando para o banco de produção.
+A SPA e a função `api/[...all].ts` sobem juntas na Vercel. Configure `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (domínio de produção), os `SEED_USER_*` e, para o e-mail de redefinição, `RESEND_API_KEY` e `RESET_EMAIL_FROM` nas variáveis de ambiente do projeto; depois rode `npm run db:migrate` apontando para o banco de produção.
 
 ## Git
 
