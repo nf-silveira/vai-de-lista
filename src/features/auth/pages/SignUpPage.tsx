@@ -1,5 +1,10 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import {
+  isValidUsername,
+  USERNAME_MAX_LENGTH,
+  USERNAME_MIN_LENGTH,
+} from '../../../../shared/username'
 import { signUp, useSession } from '../../../lib/auth-client'
 import { AuthShell } from '../components/AuthShell/AuthShell'
 import { describeSignUpError } from '../utils/describeAuthError'
@@ -9,7 +14,7 @@ const MIN_PASSWORD_LENGTH = 8
 export function SignUpPage() {
   const { data: session, isPending } = useSession()
   const navigate = useNavigate()
-  const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -23,6 +28,13 @@ export function SignUpPage() {
     event.preventDefault()
     setError(null)
 
+    if (!isValidUsername(username)) {
+      setError(
+        `O nick precisa ter de ${USERNAME_MIN_LENGTH} a ${USERNAME_MAX_LENGTH} caracteres, com letras, números, ponto ou _.`,
+      )
+      return
+    }
+
     if (password.length < MIN_PASSWORD_LENGTH) {
       setError(`A senha precisa ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`)
       return
@@ -31,9 +43,10 @@ export function SignUpPage() {
     setIsSubmitting(true)
 
     const { error: signUpError } = await signUp.email({
-      name: name.trim(),
+      name: username.trim(),
       email: email.trim(),
       password,
+      username: username.trim(),
     })
 
     setIsSubmitting(false)
@@ -59,18 +72,24 @@ export function SignUpPage() {
       }
     >
       <div>
-        <label className="form-label" htmlFor="name">
-          Nome
+        <label className="form-label" htmlFor="username">
+          Nick
         </label>
         <input
-          id="name"
+          id="username"
           type="text"
           className="form-control"
-          autoComplete="name"
+          autoComplete="username"
+          minLength={USERNAME_MIN_LENGTH}
+          maxLength={USERNAME_MAX_LENGTH}
+          pattern="[A-Za-z0-9._]+"
           required
-          value={name}
-          onChange={(event) => setName(event.target.value)}
+          value={username}
+          onChange={(event) => setUsername(event.target.value)}
         />
+        <p className="form-text">
+          De {USERNAME_MIN_LENGTH} a {USERNAME_MAX_LENGTH} caracteres: letras, números, ponto ou _.
+        </p>
       </div>
 
       <div>
@@ -86,6 +105,7 @@ export function SignUpPage() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
         />
+        <p className="form-text">Usado para recuperar a senha.</p>
       </div>
 
       <div>

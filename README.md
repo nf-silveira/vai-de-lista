@@ -9,7 +9,7 @@ Aplicativo mobile-first para registrar a compra do mercado: adicionar produtos, 
 - **React 19 + TypeScript + Vite**
 - **Bootstrap 5** (grid, formulários e componentes) + **CSS Modules** e design tokens
 - **React Router 7** (rotas com guarda de sessão)
-- **Better Auth** (e-mail/senha, sessão em cookie) sobre **Neon PostgreSQL** (`pg`)
+- **Better Auth** (nick + senha, e-mail para recuperação, sessão em cookie) sobre **Neon PostgreSQL** (`pg`)
 - **Express** para a API, executada no dev server do Vite e como função da Vercel em produção
 
 ## Estrutura
@@ -104,9 +104,10 @@ Repita o passo 2 para o ambiente `preview`. A senha do owner (`MIGRATION_DATABAS
 
 ## Autenticação
 
-- Cadastro em `/cadastro` (Nome, E-mail e Senha) cria a conta já autenticada, com sessão em cookie do Better Auth.
+- Cadastro em `/cadastro` (Nick, E-mail e Senha) cria a conta já autenticada, com sessão em cookie do Better Auth. O login é feito pelo **nick**; o e-mail serve para recuperar a senha.
 - Com `ALLOW_PUBLIC_SIGNUP=true` qualquer e-mail pode se cadastrar; sem ele, só os e-mails de `ALLOWED_EMAILS` e das contas de seed passam (os demais recebem `403`).
 - Em produção (`NODE_ENV=production`) o cadastro público só funciona com `ALLOW_PUBLIC_SIGNUP=true` explícito.
+- O nick aceita de 3 a 20 caracteres (letras, números, ponto ou `_`), é único e não diferencia maiúsculas de minúsculas. As colunas `username` e `displayUsername` entram em `public.user` pelo `npm run db:migrate`.
 - Sessão em cookie gerenciada pelo Better Auth; rotas do app passam por `ProtectedRoute`.
 - O app autentica pelas tabelas do Better Auth no schema `public` (`public.user`, `public.account`). O schema `neon_auth`, quando existir no banco, pertence ao Neon Auth e **não** é lido por este código: contas criadas lá não entram no app e a redefinição de senha do app não as alcança.
 - Recuperação de senha em `/esqueci-senha`: o Better Auth gera um link válido por 1 hora e o app o envia via Resend. Configure `RESEND_API_KEY` e `RESET_EMAIL_FROM` com um domínio verificado no Resend — o remetente de teste `onboarding@resend.dev` só entrega para o dono da conta Resend, por isso não é usado em produção.

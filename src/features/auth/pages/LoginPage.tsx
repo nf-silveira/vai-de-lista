@@ -7,7 +7,7 @@ import { describeSignInError } from '../utils/describeAuthError'
 export function LoginPage() {
   const { data: session, isPending } = useSession()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -21,7 +21,10 @@ export function LoginPage() {
     setError(null)
     setIsSubmitting(true)
 
-    const { error: signInError } = await signIn.email({ email, password })
+    const { error: signInError } = await signIn.username({
+      username: username.trim(),
+      password,
+    })
 
     setIsSubmitting(false)
 
@@ -46,17 +49,17 @@ export function LoginPage() {
       }
     >
       <div>
-        <label className="form-label" htmlFor="email">
-          E-mail
+        <label className="form-label" htmlFor="username">
+          Nick
         </label>
         <input
-          id="email"
-          type="email"
+          id="username"
+          type="text"
           className="form-control"
-          autoComplete="email"
+          autoComplete="username"
           required
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          value={username}
+          onChange={(event) => setUsername(event.target.value)}
         />
       </div>
 
