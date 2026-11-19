@@ -17,11 +17,16 @@ Aplicativo mobile-first para registrar a compra do mercado: adicionar produtos, 
 ```text
 api/                      # função serverless da Vercel (encaminha para server/app.ts)
 server/
-├── app.ts                # Express: /api/auth/*, /api/items
-├── auth.ts               # instância do Better Auth + allowlist de e-mails
+├── app.ts                # Express: /api/auth, /api/me, /api/items, /api/admin
+├── auth.ts               # Better Auth + autoaprovação de ALLOWED_EMAILS
+├── sessionGuard.ts       # sessão válida + conta ativa
+├── accounts.ts           # consultas de papel, status e exclusão de contas
+├── admin.ts              # rotas do painel de contas
 ├── db.ts                 # pool do Neon e helper de query
 ├── devApiPlugin.ts       # monta a API no dev server do Vite
-└── items.ts              # SQL e validação dos itens
+├── items.ts              # SQL dos itens
+├── itemValidation.ts     # validação dos payloads de item
+└── rateLimit.ts          # limite de requisições por IP
 scripts/
 ├── migrate.ts            # tabelas do Better Auth (via getMigrations) + shopping_items
 └── seed.ts               # cria as contas permitidas
@@ -30,7 +35,8 @@ src/
 ├── app/                  # router, layout e guarda de rota
 ├── components/           # AppHeader, BottomNavigation, LoadingState, PlaceholderPage
 ├── features/
-│   ├── auth/pages/       # LoginPage
+│   ├── admin/            # painel de contas (somente admin)
+│   ├── auth/pages/       # LoginPage, SignUpPage, AccountStatusPage
 │   └── shopping-list/    # components, hooks, services, utils, pages
 ├── lib/auth-client.ts    # cliente Better Auth
 ├── config/brand.ts
@@ -94,7 +100,7 @@ Repita o passo 2 para o ambiente `preview`. A senha do owner (`MIGRATION_DATABAS
 | `npm run lint`      | ESLint em todo o projeto                              |
 | `npm run typecheck` | Somente a checagem de tipos                           |
 | `npm run test`      | Testes de totalização e validação (`node:test`)       |
-| `npm run test:auth` | Teste de integração de login e redefinição (usa `DATABASE_URL`) |
+| `npm run test:auth` | Integração de login/redefinição e CRUD da API (usa `DATABASE_URL`) |
 | `npm run verify`    | Lint + testes + build (usado antes do commit e no CI) |
 | `npm run db:migrate`| Cria/atualiza tabelas do auth e `shopping_items`      |
 | `npm run db:seed`   | Cria as duas contas permitidas                        |

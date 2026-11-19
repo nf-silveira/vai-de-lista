@@ -44,6 +44,19 @@ export function useShoppingItems() {
     }
   }, [])
 
+  const reload = useCallback(async () => {
+    setStatus('loading')
+    setErrorMessage(null)
+
+    try {
+      setItems(await shoppingListApi.list())
+      setStatus('ready')
+    } catch (error: unknown) {
+      setErrorMessage(describeError(error))
+      setStatus('error')
+    }
+  }, [])
+
   const addItem = useCallback(async (item: NewShoppingItem) => {
     setIsAdding(true)
     setErrorMessage(null)
@@ -112,6 +125,7 @@ export function useShoppingItems() {
     errorMessage,
     isAdding,
     busyItemId,
+    reload,
     addItem,
     updateItem,
     toggleItem,
