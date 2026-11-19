@@ -69,42 +69,6 @@ const PRICE_RECORDS_INDEXES = [
      on price_records(list_item_id) where list_item_id is not null`,
 ]
 
-/**
- * A lista única antiga (`shopping_items`) vira a primeira lista ativa. A cópia
- * só acontece uma vez: se já existir item no novo schema, não mexe em nada.
- */
-const LEGACY_LIST_MIGRATION = `
-  do $$
-  declare
-    active_id uuid;
-  begin
-    select id into active_id
-      from shopping_lists
-     where status = 'active'
-     order by created_at asc
-     limit 1;
-
-    if active_id is null then
-      insert into shopping_lists (name, status)
-      values ('Lista da casa', 'active')
-      returning id into active_id;
-    end if;
-
-    if to_regclass('public.shopping_items') is not null
-       and not exists (select 1 from shopping_list_items) then
-      execute $copy$
-        insert into shopping_list_items
-          (list_id, product_name, quantity, unit, unit_price, is_collected,
-           created_at, updated_at)
-        select $1, name, quantity, unit, unit_price, is_checked,
-               created_at, updated_at
-          from shopping_items
-      $copy$ using active_id;
-    end if;
-  end
-  $$
-`
-
 /** Colunas de papel, aprovação e banimento usadas pelo painel de contas. */
 const USER_ACCOUNT_COLUMNS = [
   `alter table "user" add column if not exists role text not null default 'user'`,
@@ -137,7 +101,6 @@ async function run(): Promise<void> {
       await query(statement)
     }
 
-    await query(LEGACY_LIST_MIGRATION)
     console.log('Listas, itens de compra e registros de preço aplicados.')
 
     for (const statement of USER_ACCOUNT_COLUMNS) {
