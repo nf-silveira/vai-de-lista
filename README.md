@@ -24,7 +24,9 @@ server/
 ├── admin.ts              # rotas do painel de contas
 ├── db.ts                 # pool do Neon e helper de query
 ├── devApiPlugin.ts       # monta a API no dev server do Vite
-├── items.ts              # SQL dos itens
+├── items.ts              # SQL dos itens da lista ativa
+├── lists.ts              # lista ativa, finalização e consultas do histórico
+├── products.ts           # normalização de produto e preço por unidade
 ├── itemValidation.ts     # validação dos payloads de item
 └── rateLimit.ts          # limite de requisições por IP
 scripts/
@@ -37,6 +39,7 @@ src/
 ├── features/
 │   ├── admin/            # painel de contas (somente admin)
 │   ├── auth/pages/       # LoginPage, SignUpPage, AccountStatusPage
+│   ├── history/          # histórico e detalhe das compras finalizadas
 │   └── shopping-list/    # components, hooks, services, utils, pages
 ├── lib/auth-client.ts    # cliente Better Auth
 ├── config/brand.ts
@@ -102,7 +105,7 @@ Repita o passo 2 para o ambiente `preview`. A senha do owner (`MIGRATION_DATABAS
 | `npm run test`      | Testes de totalização e validação (`node:test`)       |
 | `npm run test:auth` | Integração de login/redefinição e CRUD da API (usa `DATABASE_URL`) |
 | `npm run verify`    | Lint + testes + build (usado antes do commit e no CI) |
-| `npm run db:migrate`| Cria/atualiza tabelas do auth e `shopping_items`      |
+| `npm run db:migrate`| Cria/atualiza tabelas do auth, listas e preços       |
 | `npm run db:seed`   | Cria as duas contas permitidas                        |
 | `npm run db:remove-seed`| Apaga as contas de seed (idempotente)            |
 | `npm run db:reset-password`| Redefine a senha de uma conta existente     |
@@ -131,14 +134,20 @@ O comando grava o hash do Better Auth, encerra as sessões abertas daquela conta
 
 ## API
 
-Todas as rotas de itens exigem sessão de conta **ativa**.
+Todas as rotas de itens e do histórico exigem sessão de conta **ativa**.
+
+Finalizar uma compra marca a lista como concluída em transação e grava um registro em `price_records` por item com preço. Repetir a finalização com o mesmo `listId` devolve a mesma compra, sem duplicar preços; itens sem preço continuam no histórico, mas não geram registro. Excluir uma compra remove o retrato e mantém os `price_records` (o vínculo vira nulo).
 
 | Método   | Rota             | Descrição                         |
 | -------- | ---------------- | --------------------------------- |
-| `GET`    | `/api/items`     | Lista compartilhada               |
+| `GET`    | `/api/items`     | Lista ativa (itens + id/nome)     |
 | `POST`   | `/api/items`     | Adiciona item (nome, qtd, un., preço) |
 | `PATCH`  | `/api/items/:id` | Edita campos parciais do item (`name`, `quantity`, `unit`, `unitPrice`, `isChecked`) |
 | `DELETE` | `/api/items/:id` | Remove item                       |
+| `GET`    | `/api/purchases` | Compras finalizadas (histórico)   |
+| `POST`   | `/api/purchases` | Finaliza a lista (`{ listId }`)   |
+| `GET`    | `/api/purchases/:id` | Detalhe da compra             |
+| `DELETE` | `/api/purchases/:id` | Exclui a compra do histórico  |
 | `GET`    | `/api/me`        | Conta da sessão, com papel e status |
 | `GET`    | `/api/admin/users` | Lista contas (somente admin)     |
 | `POST`   | `/api/admin/users/:id/approve` | Aprova o cadastro  |

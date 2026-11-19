@@ -1,0 +1,42 @@
+.button {
+  min-height: 48px;
+}
+
+.card {
+  border-color: var(--color-border);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-soft),
+    var(--color-surface) 70%
+  );
+}
+
+.question {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-strong);
+  margin-bottom: var(--space-xs);
+}
+
+.summary {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--space-sm);
+}
+
+.warning {
+  font-size: 13px;
+  color: #8a5a00;
+  margin-bottom: var(--space-md);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.actions > button {
+  flex: 1;
+  min-height: 44px;
+}
