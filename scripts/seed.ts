@@ -1,3 +1,4 @@
+import { usernameFromEmail } from '../shared/username.js'
 import { auth } from '../server/auth.js'
 import { pool, query } from '../server/db.js'
 
@@ -51,6 +52,7 @@ async function run(): Promise<void> {
         email: user.email,
         password: user.password,
         name: user.name,
+        username: usernameFromEmail(user.email),
       },
     })
 
