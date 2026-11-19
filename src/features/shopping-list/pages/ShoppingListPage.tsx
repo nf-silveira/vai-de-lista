@@ -12,6 +12,7 @@ export function ShoppingListPage() {
     errorMessage,
     isAdding,
     busyItemId,
+    reload,
     addItem,
     updateItem,
     toggleItem,
@@ -20,6 +21,24 @@ export function ShoppingListPage() {
 
   if (status === 'loading') {
     return <LoadingState message="Carregando a lista..." />
+  }
+
+  // Sem isso, uma falha de rede na primeira carga apareceria como lista vazia.
+  if (status === 'error') {
+    return (
+      <section className={styles.page}>
+        <div className="alert alert-danger" role="alert">
+          <p className="mb-2">{errorMessage}</p>
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-danger"
+            onClick={() => void reload()}
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </section>
+    )
   }
 
   const summary = summarizeItems(items)
