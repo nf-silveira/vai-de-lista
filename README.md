@@ -48,14 +48,14 @@ src/
 | `APP_DB_USER` / `APP_DB_PASSWORD`                | role de runtime criado por `db:setup-runtime-role` |
 | `BETTER_AUTH_SECRET`                             | segredo de assinatura das sessões (obrigatória)  |
 | `BETTER_AUTH_URL`                                | URL do app (ex.: `http://localhost:5174`)        |
-| `ALLOWED_EMAILS`                                 | e-mails que acessam a lista (obrigatória em produção) |
-| `ALLOW_PUBLIC_SIGNUP`                            | `true` libera o cadastro para qualquer e-mail    |
+| `ALLOWED_EMAILS`                                 | e-mails que já nascem aprovados no cadastro      |
+| `ADMIN_EMAIL`                                    | conta promovida a administradora por `db:grant-admin` |
 | `RESEND_API_KEY`                                 | chave do Resend usada no e-mail de redefinição   |
 | `RESET_EMAIL_FROM`                               | remetente verificado no Resend (obrigatório em produção) |
 | `SEED_USER_1_EMAIL` / `SEED_USER_1_PASSWORD`     | credenciais da primeira conta permitida          |
 | `SEED_USER_2_EMAIL` / `SEED_USER_2_PASSWORD`     | credenciais da segunda conta permitida           |
 
-A lista é única e compartilhada entre as contas da casa. Só quem está em `ALLOWED_EMAILS` lê e altera itens: em produção, sem essa variável, o acesso é negado. Fora de produção, sem ela, qualquer sessão acessa.
+A lista é única e compartilhada entre as contas da casa. Toda conta nasce **pendente** e só lê e altera itens depois de aprovada pelo administrador; contas banidas perdem o acesso e as sessões abertas.
 
 2. Aplique o schema e crie as contas:
 
@@ -100,13 +100,16 @@ Repita o passo 2 para o ambiente `preview`. A senha do owner (`MIGRATION_DATABAS
 | `npm run db:seed`   | Cria as duas contas permitidas                        |
 | `npm run db:remove-seed`| Apaga as contas de seed (idempotente)            |
 | `npm run db:reset-password`| Redefine a senha de uma conta existente     |
+| `npm run db:grant-admin`| Promove `ADMIN_EMAIL` a administradora ativa |
 | `npm run db:setup-runtime-role`| Cria/atualiza o role de runtime com grants  |
 
 ## Autenticação
 
 - Cadastro em `/cadastro` (Nick, E-mail e Senha) cria a conta já autenticada, com sessão em cookie do Better Auth. O login é feito pelo **nick**; o e-mail serve para recuperar a senha.
-- Com `ALLOW_PUBLIC_SIGNUP=true` qualquer e-mail pode se cadastrar; sem ele, só os e-mails de `ALLOWED_EMAILS` e das contas de seed passam (os demais recebem `403`).
-- Em produção (`NODE_ENV=production`) o cadastro público só funciona com `ALLOW_PUBLIC_SIGNUP=true` explícito.
+- Todo cadastro nasce com status `pending` e vê a tela de espera; os e-mails de `ALLOWED_EMAILS` já nascem `active`.
+- O administrador (`role = 'admin'`) vê o atalho **Contas** no cabeçalho (`/admin`) e aprova, bane, desbane e exclui contas. O painel nunca altera a própria conta do administrador.
+- `role`, `status` e `ban_reason` entram em `public.user` pelo `npm run db:migrate`. A primeira conta administradora precisa existir antes de `ADMIN_EMAIL=seu@email npm run db:grant-admin`, que a deixa `admin` e `active`.
+- Banir encerra todas as sessões da conta; excluir remove credencial, sessões e tokens de redefinição junto com o usuário.
 - O nick aceita de 3 a 20 caracteres (letras, números, ponto ou `_`), é único e não diferencia maiúsculas de minúsculas. As colunas `username` e `displayUsername` entram em `public.user` pelo `npm run db:migrate`.
 - Sessão em cookie gerenciada pelo Better Auth; rotas do app passam por `ProtectedRoute`.
 - O app autentica pelas tabelas do Better Auth no schema `public` (`public.user`, `public.account`). O schema `neon_auth`, quando existir no banco, pertence ao Neon Auth e **não** é lido por este código: contas criadas lá não entram no app e a redefinição de senha do app não as alcança.
@@ -122,7 +125,7 @@ O comando grava o hash do Better Auth, encerra as sessões abertas daquela conta
 
 ## API
 
-Todas as rotas de itens exigem sessão ativa.
+Todas as rotas de itens exigem sessão de conta **ativa**.
 
 | Método   | Rota             | Descrição                         |
 | -------- | ---------------- | --------------------------------- |
@@ -130,6 +133,12 @@ Todas as rotas de itens exigem sessão ativa.
 | `POST`   | `/api/items`     | Adiciona item (nome, qtd, un., preço) |
 | `PATCH`  | `/api/items/:id` | Edita campos parciais do item (`name`, `quantity`, `unit`, `unitPrice`, `isChecked`) |
 | `DELETE` | `/api/items/:id` | Remove item                       |
+| `GET`    | `/api/me`        | Conta da sessão, com papel e status |
+| `GET`    | `/api/admin/users` | Lista contas (somente admin)     |
+| `POST`   | `/api/admin/users/:id/approve` | Aprova o cadastro  |
+| `POST`   | `/api/admin/users/:id/ban` | Bane a conta e encerra as sessões |
+| `POST`   | `/api/admin/users/:id/unban` | Desbane a conta              |
+| `DELETE` | `/api/admin/users/:id` | Exclui a conta            |
 | `*`      | `/api/auth/*`    | Better Auth                       |
 
 ## Deploy

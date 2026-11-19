@@ -1,10 +1,5 @@
 export type EnvMap = Record<string, string | undefined>
 
-export interface MemberAccess {
-  allowed: boolean
-  reason: 'allowed' | 'not-listed' | 'not-configured'
-}
-
 export function parseEmailList(value: string | undefined): string[] {
   const emails = (value ?? '')
     .split(',')
@@ -15,28 +10,17 @@ export function parseEmailList(value: string | undefined): string[] {
 }
 
 /**
- * Quem pode ler e alterar a lista compartilhada. Só `ALLOWED_EMAILS`: as contas
- * de seed ficam de fora de propósito, porque têm senha conhecida.
+ * E-mails que já nascem aprovados. Como o acesso agora depende do status da
+ * conta aprovado pelo administrador, `ALLOWED_EMAILS` deixou de ser uma
+ * allowlist de acesso e passou a ser apenas a lista de confiança do cadastro.
  */
-export function readMemberEmails(env: EnvMap): string[] {
+export function readAutoApprovedEmails(env: EnvMap): string[] {
   return parseEmailList(env.ALLOWED_EMAILS)
 }
 
-/**
- * Sem allowlist configurada o acesso é liberado apenas fora de produção; em
- * produção a falha é fechada, para que um esquecimento não exponha a lista.
- */
-export function checkMemberAccess(
+export function isAutoApproved(
   email: string,
-  memberEmails: string[],
-  { isProduction }: { isProduction: boolean },
-): MemberAccess {
-  if (memberEmails.length === 0) {
-    return { allowed: !isProduction, reason: 'not-configured' }
-  }
-
-  const normalized = email.trim().toLowerCase()
-  const listed = memberEmails.includes(normalized)
-
-  return { allowed: listed, reason: listed ? 'allowed' : 'not-listed' }
+  autoApprovedEmails: string[],
+): boolean {
+  return autoApprovedEmails.includes(email.trim().toLowerCase())
 }

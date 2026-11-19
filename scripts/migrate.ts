@@ -28,6 +28,17 @@ const SHOPPING_ITEMS_UNIT_COLUMN = `
     add column if not exists unit text not null default 'un'
 `
 
+/** Colunas de papel, aprovação e banimento usadas pelo painel de contas. */
+const USER_ACCOUNT_COLUMNS = [
+  `alter table "user" add column if not exists role text not null default 'user'`,
+  `alter table "user" add column if not exists status text not null default 'pending'`,
+  `alter table "user" add column if not exists ban_reason text`,
+  `alter table "user" drop constraint if exists user_role_check`,
+  `alter table "user" add constraint user_role_check check (role in ('admin', 'user'))`,
+  `alter table "user" drop constraint if exists user_status_check`,
+  `alter table "user" add constraint user_status_check check (status in ('pending', 'active', 'banned'))`,
+]
+
 async function run(): Promise<void> {
   preferOwnerConnection()
 
@@ -43,6 +54,11 @@ async function run(): Promise<void> {
     await query(SHOPPING_ITEMS_TABLE)
     await query(SHOPPING_ITEMS_UNIT_COLUMN)
     console.log('Tabela shopping_items aplicada.')
+
+    for (const statement of USER_ACCOUNT_COLUMNS) {
+      await query(statement)
+    }
+    console.log('Colunas de papel e status de conta aplicadas.')
   } finally {
     await pool.end()
   }
