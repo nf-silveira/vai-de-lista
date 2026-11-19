@@ -13,7 +13,7 @@ const USERNAME_ERRORS: Record<string, string> = {
 
 export function describeSignInError(error: AuthErrorInfo): string {
   if (error.status === 401) {
-    return 'Nick ou senha inválidos.'
+    return 'Nick/e-mail ou senha inválidos.'
   }
 
   if (error.status === 403) {

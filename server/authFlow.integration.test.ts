@@ -63,6 +63,12 @@ describe('fluxo de login e redefinição de senha', {
       assert.equal(session.user.email, email)
       assert.equal(session.user.username, username)
 
+      // O mesmo login também precisa funcionar informando o e-mail.
+      const emailSession = await auth.api.signInEmail({
+        body: { email, password: initialPassword },
+      })
+      assert.equal(emailSession.user.id, session.user.id)
+
       const baseUrl = process.env.BETTER_AUTH_URL ?? 'http://localhost:5174'
       await auth.api.requestPasswordReset({
         body: { email, redirectTo: `${baseUrl}/redefinir-senha` },

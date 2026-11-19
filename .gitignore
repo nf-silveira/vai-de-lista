@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Playwright
+playwright-report
+test-results
+
 # Contratos, prompts e regras internas ficam apenas locais
 .docs/
 
