@@ -17,7 +17,8 @@
     "test": "node --import tsx --test \"src/**/*.test.ts\" \"server/**/*.test.ts\"",
     "test:auth": "node --env-file-if-exists=.env.local --import tsx --test --test-concurrency=1 \"server/*.integration.test.ts\"",
     "verify": "npm run lint && npm run test && npm run build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:layout": "playwright test"
   },
   "dependencies": {
     "better-auth": "^1.7.25",
@@ -32,6 +33,7 @@
   "devDependencies": {
     "@better-auth/cli": "^1.4.22",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.1",
     "@types/express": "^5.0.6",
     "@types/node": "^24.19.2",
     "@types/pg": "^8.23.1",

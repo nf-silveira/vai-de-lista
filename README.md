@@ -2,6 +2,8 @@
 
 > Anotou. Comprou. Economizou.
 
+> **Projeto em desenvolvimento:** pode conter bugs, problemas de autenticação entre outros.
+
 Aplicativo mobile-first para registrar a compra do mercado: adicionar produtos, informar preços, acompanhar o total e, futuramente, comparar com compras anteriores. A lista é **compartilhada** entre duas contas.
 
 ## Stack
@@ -9,7 +11,7 @@ Aplicativo mobile-first para registrar a compra do mercado: adicionar produtos, 
 - **React 19 + TypeScript + Vite**
 - **Bootstrap 5** importado de forma seletiva (formulários, botões, cards, lista, alertas) + **CSS Modules** e design tokens
 - **React Router 7** (rotas com guarda de sessão)
-- **Better Auth** (nick + senha, e-mail para recuperação, sessão em cookie) sobre **Neon PostgreSQL** (`pg`)
+- **Better Auth** (nick ou e-mail + senha, recuperação por e-mail, sessão em cookie) sobre **Neon PostgreSQL** (`pg`)
 - **Express** para a API, executada no dev server do Vite e como função da Vercel em produção
 
 ## Estrutura
@@ -107,6 +109,7 @@ Repita o passo 2 para o ambiente `preview`. A senha do owner (`MIGRATION_DATABAS
 | `npm run typecheck` | Somente a checagem de tipos                           |
 | `npm run test`      | Testes de totalização e validação (`node:test`)       |
 | `npm run test:auth` | Integração de login/redefinição e CRUD da API (usa `DATABASE_URL`) |
+| `npm run test:layout`| Layout mobile real em 320/360/390/430 px (Playwright) |
 | `npm run verify`    | Lint + testes + build (usado antes do commit e no CI) |
 | `npm run db:migrate`| Cria/atualiza tabelas do auth, listas e preços       |
 | `npm run db:seed`   | Cria as duas contas permitidas                        |
@@ -117,7 +120,7 @@ Repita o passo 2 para o ambiente `preview`. A senha do owner (`MIGRATION_DATABAS
 
 ## Autenticação
 
-- Cadastro em `/cadastro` (Nick, E-mail e Senha) cria a conta já autenticada, com sessão em cookie do Better Auth. O login é feito pelo **nick**; o e-mail serve para recuperar a senha.
+- Cadastro em `/cadastro` (Nick, E-mail e Senha) cria a conta já autenticada, com sessão em cookie do Better Auth. O login aceita **nick ou e-mail**; o e-mail também serve para recuperar a senha.
 - Todo cadastro nasce com status `pending` e vê a tela de espera; os e-mails de `ALLOWED_EMAILS` já nascem `active`.
 - O administrador (`role = 'admin'`) vê o atalho **Contas** no cabeçalho (`/admin`) e aprova, bane, desbane e exclui contas. O painel nunca altera a própria conta do administrador.
 - `role`, `status` e `ban_reason` entram em `public.user` pelo `npm run db:migrate`. A primeira conta administradora precisa existir antes de `ADMIN_EMAIL=seu@email npm run db:grant-admin`, que a deixa `admin` e `active`.
@@ -170,4 +173,4 @@ A SPA e a função `api/[...all].ts` sobem juntas na Vercel. Configure `DATABASE
 ## Git
 
 - Desenvolvimento em `develop`; `main` só recebe via Pull Request com `npm run verify` verde.
-- O CI sobe um Postgres 17 de serviço, roda `npm run db:migrate` e depois executa `npm run test:auth`, então os testes de integração (login, CRUD, finalização e comparação) também são gate de regressão.
+- O CI sobe um Postgres 17 de serviço, roda `npm run db:migrate`, executa `npm run test:layout` (Playwright em 320–430 px) e depois `npm run test:auth`, então layout mobile e testes de integração (login, CRUD, finalização e comparação) também são gate de regressão.
