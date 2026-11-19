@@ -26,6 +26,8 @@ server/
 ├── devApiPlugin.ts       # monta a API no dev server do Vite
 ├── items.ts              # SQL dos itens da lista ativa
 ├── lists.ts              # lista ativa, finalização e consultas do histórico
+├── comparisonQueries.ts  # busca de produtos e comparação de preços
+├── priceComparison.ts    # regras puras das janelas e variações
 ├── products.ts           # normalização de produto e preço por unidade
 ├── itemValidation.ts     # validação dos payloads de item
 └── rateLimit.ts          # limite de requisições por IP
@@ -39,6 +41,7 @@ src/
 ├── features/
 │   ├── admin/            # painel de contas (somente admin)
 │   ├── auth/pages/       # LoginPage, SignUpPage, AccountStatusPage
+│   ├── comparison/       # busca de produto e comparação de preços
 │   ├── history/          # histórico e detalhe das compras finalizadas
 │   └── shopping-list/    # components, hooks, services, utils, pages
 ├── lib/auth-client.ts    # cliente Better Auth
@@ -138,6 +141,8 @@ Todas as rotas de itens e do histórico exigem sessão de conta **ativa**.
 
 Finalizar uma compra marca a lista como concluída em transação e grava um registro em `price_records` por item com preço. Repetir a finalização com o mesmo `listId` devolve a mesma compra, sem duplicar preços; itens sem preço continuam no histórico, mas não geram registro. Excluir uma compra remove o retrato e mantém os `price_records` (o vínculo vira nulo).
 
+A comparação usa sempre o preço mais recente do produto e três referências: a compra imediatamente anterior, o registro mais recente dos últimos 7 dias e o registro mais recente do mês-calendário anterior. Unidades compatíveis são comparadas por unidade equivalente (kg↔g, l↔ml); casos como caixa ou unidades diferentes são bloqueados com explicação. Percentual só existe quando o preço de referência é maior que zero.
+
 | Método   | Rota             | Descrição                         |
 | -------- | ---------------- | --------------------------------- |
 | `GET`    | `/api/items`     | Lista ativa (itens + id/nome)     |
@@ -148,6 +153,8 @@ Finalizar uma compra marca a lista como concluída em transação e grava um reg
 | `POST`   | `/api/purchases` | Finaliza a lista (`{ listId }`)   |
 | `GET`    | `/api/purchases/:id` | Detalhe da compra             |
 | `DELETE` | `/api/purchases/:id` | Exclui a compra do histórico  |
+| `GET`    | `/api/products`  | Busca produtos com preço (`search`) |
+| `GET`    | `/api/comparisons` | Compara o preço atual (`productKey`) |
 | `GET`    | `/api/me`        | Conta da sessão, com papel e status |
 | `GET`    | `/api/admin/users` | Lista contas (somente admin)     |
 | `POST`   | `/api/admin/users/:id/approve` | Aprova o cadastro  |
