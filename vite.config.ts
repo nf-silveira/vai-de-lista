@@ -8,6 +8,17 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), devApiPlugin()],
+    css: {
+      preprocessorOptions: {
+        scss: {
+          // O Bootstrap 5.3 ainda compila com @import e funções globais
+          // (twbs/bootstrap#40962). O aviso de import fica restrito ao wrapper
+          // legado e os demais são silenciados apenas nas dependências.
+          quietDeps: true,
+          silenceDeprecations: ['import'],
+        },
+      },
+    },
     server: {
       port: 5174,
       strictPort: true,
