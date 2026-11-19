@@ -15,7 +15,7 @@
     "db:setup-runtime-role": "tsx --env-file-if-exists=.env.local scripts/setupRuntimeRole.ts",
     "typecheck": "tsc -b",
     "test": "node --import tsx --test \"src/**/*.test.ts\" \"server/**/*.test.ts\"",
-    "test:auth": "node --env-file-if-exists=.env.local --import tsx --test \"server/*.integration.test.ts\"",
+    "test:auth": "node --env-file-if-exists=.env.local --import tsx --test --test-concurrency=1 \"server/*.integration.test.ts\"",
     "verify": "npm run lint && npm run test && npm run build",
     "preview": "vite preview"
   },
@@ -42,6 +42,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.13.0",
+    "sass": "^1.108.2",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",

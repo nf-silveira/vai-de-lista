@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import type {
   ComparisonPeriod,
@@ -102,6 +103,12 @@ export function ComparisonPage() {
     errorMessage: comparisonError,
     reload,
   } = useComparison(selectedKey)
+  const resultRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (!comparison) return
+    resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [comparison])
 
   function handleSelect(productKey: string) {
     setParams({ produto: productKey })
@@ -199,7 +206,7 @@ export function ComparisonPage() {
       )}
 
       {comparison && !isLoading && (
-        <article className={styles.result}>
+        <article className={styles.result} ref={resultRef} aria-live="polite">
           <header className={styles.resultHeader}>
             <h3 className={styles.resultTitle}>{comparison.productName}</h3>
             <p className={styles.current}>
